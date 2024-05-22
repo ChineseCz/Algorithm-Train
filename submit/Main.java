@@ -2,14 +2,14 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1008().output();
+        new AkP1012().input();
 
     }
 }
 
 abstract class Problem {
     Scanner scan = new Scanner(System.in);
-    int n,k;
+    int n,k,T;
     int[] nums;
     long ans;
     public abstract void input();
@@ -24,13 +24,290 @@ abstract class Problem {
     }
 
 }
-/*  对于区间[j+1,i]满足情况，则有
+class lc1094 {
+
+}
+class AkP1012 extends Problem {
+    int[] dif;
+    public void add(int l,int r,int c) {
+        dif[l]+=c;
+        dif[r+1]-=c;
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        nums = new int[n+1];
+        dif = new int[n+2];//add()中涉及dif[n+1]，实际上并不需要，但减少写边界判断，且不影响，因为区间只考虑到n
+        /* dif为nums的差分 */
+        for (int i=1;i<=n;i++) {
+            nums[i] = scan.nextInt();
+            dif[i] = nums[i] - nums[i - 1];
+        }
+        for (int i=1;i<=k;i++) {
+            int l,r,c;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            c = scan.nextInt();
+            add(l,r,c);
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        ans = Integer.MAX_VALUE;
+        /* 由nums为dif的前缀和，更新nums */
+        for (int i=1;i<=n;i++) {
+            nums[i] = nums[i-1] + dif[i];
+            ans = Math.min(nums[i],ans);
+        }
+        System.out.println(ans);
+    }
+}
+/* 该题前后缀 + 枚举 最灵活；本题不是三元组类型
+    要有区间思想，划分为三部分[0,i-1],[i,i+1],[i+2,n-1]
+    前后缀记录 [i,n-1]，[0，i-1]
+* */
+class AkP1011 extends Problem {
+    int[] rmin,rmax;//[i,n-1]
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        nums = new int[n];
+        rmin = new int[n + 1];//开大一位，方便后续不用多写初始化rmin[n-1] = nums[n-1];
+        rmax = new int[n + 1];
+        for (int i=0;i<n;i++) {
+            nums[i] = scan.nextInt();
+        }
+        Arrays.fill(rmin,Integer.MAX_VALUE);
+        for (int i=n-1;i>=0;i--) {
+            rmin[i] = Math.min(rmin[i+1],nums[i]);
+            rmax[i] = Math.max(rmax[i+1],nums[i]);
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        ans = Integer.MAX_VALUE;
+        int lmin = Integer.MAX_VALUE,lmax = 0;//[0,i-1]
+        for (int i=0;i<n-1;i++) {
+            if (i!=0) {
+                lmin = Math.min(lmin,nums[i-1]);
+                lmax = Math.max(lmax,nums[i-1]);
+            }
+            int x = nums[i] + nums[i+1];//[i,i+1]
+
+            int max = Math.max(x,Math.max(lmax,rmax[i+2]));//rmax[n]，rmin[n]实际不可能取到,[n,n-1]不存在
+            int min = Math.min(x,Math.min(lmin,rmin[i+2]));
+            ans = Math.min(ans,max - min);
+        }
+        System.out.println(ans);
+    }
+}
+/* p1010用printf会超时，必须用print，原理还不了解 */
+class AkP1010 extends Problem {
+
+    int[] l0,r0,l1,r1;
+    int[] ans;
+    int cnt;
+    @Override
+    public void input() {
+        T = scan.nextInt();
+        while(T-->0) {
+            n = scan.nextInt();
+            scan.nextLine();
+            nums = new int[n];
+
+            for (int i=0;i<n;i++)
+                nums[i] = scan.nextInt();
+
+            l0 = new int[n];
+            r0 = new int[n];
+            l1 = new int[n];
+            r1 = new int[n];
+            for (int i=1;i<n;i++) {
+                 if (nums[i-1] == 0) {
+                     l0[i] = l0[i - 1] + 1;
+                     l1[i] = l1[i - 1];
+                 }
+                 else {
+                     l1[i] = l1[i - 1] + 1;
+                     l0[i] = l0[i - 1];
+                 }
+            }
+            for (int i=n-2;i>=0;i--) {
+                if (nums[i+1] == 0) {
+                    r0[i] = r0[i + 1] + 1;
+                    r1[i] = r1[i + 1];
+                }
+                else {
+                    r1[i] = r1[i + 1] + 1;
+                    r0[i] = r0[i + 1];
+                }
+            }
+//            System.out.println(Arrays.toString(l0));
+//            System.out.println(Arrays.toString(l1));
+//            System.out.println(Arrays.toString(r0));
+//            System.out.println(Arrays.toString(r1));
+            output();
+
+        }
+    }
+
+    @Override
+    public void output() {
+        ans = new int[n];
+        if (nums[0] == 0) ans[0] = r0[0];
+        else ans[0] = r1[0];
+        System.out.print(ans[0]+" ");
+        for (int i=1;i<n;i++) {
+
+            if (nums[i] == 0)
+                ans[i] = l1[i] + r0[i];
+            else
+                ans[i] = l0[i] + r1[i];
+
+            System.out.print(ans[i] + " ");
+        }
+        System.out.println();
+
+
+
+    }
+}
+class Acw4114 extends Problem {
+    String strs;
+    int[] l,r;
+    int cnt;
+    @Override
+    public void input() {
+        T = scan.nextInt();
+        while(T-->0) {
+            n = scan.nextInt();
+            cnt++;
+            scan.nextLine();
+            nums = new int[n];
+            strs = scan.nextLine();
+            l = new int[n];
+            Arrays.fill(l,-1);
+            for (int i=0;i<n;i++) {
+                nums[i] = strs.charAt(i) - '0';
+                if (nums[i] == 1)
+                    l[i] = i;
+                else if (nums[i] == 0 && i!=0)
+                    l[i] = l[i-1];
+            }
+            r = new int[n];
+            Arrays.fill(r,-1);
+            for (int i=n-1;i>=0;i--) {
+                if (nums[i] == 1)
+                    r[i] = i;
+                else if (nums[i] == 0 && i!=n-1)
+                    r[i] = r[i+1];
+            }
+            output();
+//            System.out.println(Arrays.toString(l));
+//            System.out.println(Arrays.toString(r));
+
+
+        }
+    }
+
+    @Override
+    public void output() {
+        for (int i=0;i<n;i++) {
+            int right = Integer.MAX_VALUE,left = Integer.MAX_VALUE;
+            if (r[i] != -1) right = r[i] - i;
+            if (l[i] != -1) left = i - l[i];
+
+            ans += Math.min(left,right);
+        }
+        System.out.printf("Case #%d: %d\n",cnt,ans);
+        ans = 0;
+    }
+}
+class Acw4977 extends Problem {
+    long[] nums;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        nums = new long[n];
+        for (int i=0;i<n;i++)
+            nums[i] = scan.nextLong();
+    }
+
+    @Override
+    public void output() {
+        input();
+        int[] l = new int[n];
+        l[0] = 0;
+        Map<Long,Integer> map = new HashMap<>();
+        map.put(nums[0],1);
+        for (int i=1;i<n;i++) {
+            if (nums[i]%k == 0 && map.containsKey(nums[i]/k))
+                l[i] += map.get(nums[i]/k);
+
+            map.put(nums[i],map.getOrDefault(nums[i],0)+1);
+        }
+        int[] r = new int[n];
+        r[n-1] = 0;
+        Map<Long,Integer> map1 = new HashMap<>();
+        map1.put(nums[n-1],1);
+        for (int i=n-2;i>=0;i--) {
+            if (map1.containsKey(nums[i]*k))
+                r[i] += map1.get(nums[i]*k);
+
+            map1.put(nums[i],map1.getOrDefault(nums[i],0)+1);
+        }
+
+//        System.out.println(Arrays.toString(l));
+//        System.out.println(Arrays.toString(r));
+        for (int i=1;i<n-1;i++) {
+            ans += (long)l[i]*r[i];
+        }
+        System.out.println(ans);
+    }
+}
+class Lc2909 extends Problem {
+
+    @Override
+    public void input() {
+
+    }
+
+    @Override
+    public void output() {
+        nums = new int[]{8,6,1,5,3};
+        n = nums.length;
+        int[] l = new int[n];//l[i]，i左侧最小的元素
+        int[] r = new int[n];
+        l[0] = Integer.MAX_VALUE;
+        r[n-1] = Integer.MAX_VALUE;
+        for (int i=1;i<n;i++) {
+            l[i] = Math.min(l[i-1],nums[i-1]);
+        }
+        for (int i=n-2;i>=0;i--) {
+            r[i] = Math.min(r[i+1],nums[i+1]);
+        }
+        for (int i=0;i<n;i++) {
+            if (nums[i] > l[i] && nums[i] > r[i]) {
+                ans = l[i] + r[i] + nums[i];
+            }
+        }
+        System.out.println(ans);
+    }
+}
+/*      对于区间[j+1,i]满足情况，则有
     Si-Sj = (i-j)*k
     Si - ik = Sj - jk
     ∴逆推：
         遍历i，对于每个Si，若j<i时  已有Sj - jk = Si-ik；则[j+1,i]成立
- */
+*/
 class AkP1008 extends Problem {
+
     long[] s;
     long k;
     long[] nums;
