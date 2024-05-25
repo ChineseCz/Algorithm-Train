@@ -640,37 +640,7 @@ class AkP1009 extends  Problem {
         System.out.printf("%d %d",n*(n+1)/2-ans,ans);
     }
 }
-class Acw1230 extends Problem {
 
-    @Override
-    public void input() {
-        n = scan.nextInt();
-        k = scan.nextInt();
-        nums = new int[n+1];
-        for (int i=1;i<=n;i++) {
-            nums[i] = scan.nextInt();
-        }
-    }
-    /*  a>=0,b>=0
-        (a-b)%k = a%k - b%k
-        (a+b)%k = (a%k + b%k) % k  通用
-     */
-    public void output() {
-        input();
-        int sum = 0;
-        Map<Integer,Integer> map = new HashMap<>();
-        map.put(0,1);//哈希表存前缀和%k
-        for (int i=1;i<=n;i++) {
-            sum = (sum + nums[i]) % k;
-            if (map.containsKey(sum)) {
-                ans += map.get(sum);
-            }
-            map.put(sum,map.getOrDefault(sum,0)+1);
-        }
-//        System.out.println(map);
-        System.out.println(ans);
-    }
-}
 class Acw3771 extends Problem {
     @Override
     public void input() {
@@ -800,3 +770,300 @@ class Ak1001 extends Problem {
 }
 
 
+class Acw1230 extends Problem {
+
+    @Override
+    public void output() {
+        input();
+        Map<Integer,Integer> map = new HashMap<>();
+        map.put(0,1);//和为0
+        int sum = 0;
+        for (int i=1;i<n;i++) {
+            sum += nums[i];
+            sum %=k;
+
+            ans += map.getOrDefault(sum, 0);
+
+
+            map.put(sum,map.getOrDefault(sum,0)+1);
+        }
+//        System.out.println(map);
+        System.out.println(ans);
+    }
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        nums = new int[n];
+        for (int i=0;i<n;i++)
+            nums[i] = scan.nextInt();
+    }
+}
+class AkP1007 extends Problem {
+    int[][][] sum;
+    @Override
+    public void output() {
+        input();
+        int q = scan.nextInt();
+        while(q-->0) {
+            int x1 = scan.nextInt();
+            int y1 = scan.nextInt();
+            int x2 = scan.nextInt();
+            int y2 = scan.nextInt();
+            int[] cnt = new int[3];
+            for (int i=0;i<3;i++) {
+                cnt[i] = sum[i][x2][y2] - sum[i][x2][y1-1]
+                        - sum[i][x1-1][y2] + sum[i][x1-1][y1-1];
+                if (cnt[i]>0) ans++;
+            }
+//            System.out.println(Arrays.deepToString(sum[0]));
+//            System.out.println(Arrays.deepToString(sum[1]));
+//            System.out.println(Arrays.deepToString(sum[2]));
+            System.out.println(ans);
+            ans = 0;
+        }
+    }
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        scan.nextLine();
+        sum = new int[3][n+1][m+1];
+        for (int i=1;i<=n;i++) {
+            String[] strs = scan.nextLine().split(" ");
+
+            for (int j=1;j<=m;j++) {
+                char c = strs[j-1].charAt(0);
+                for (int k=0;k<3;k++) {
+                    if (c - 'x' == k) {//c == map.get(k)用哈希表映射也可以
+                        sum[k][i][j] = sum[k][i - 1][j]
+                                + sum[k][i][j - 1]
+                                - sum[k][i - 1][j - 1] + 1;
+                    }
+                    else {
+                        sum[k][i][j] = sum[k][i - 1][j]
+                                + sum[k][i][j - 1]
+                                - sum[k][i - 1][j - 1];
+                    }
+                }
+            }
+        }
+    }
+}
+class AkP1006 extends Problem {
+    int[][] sum;
+    @Override
+    public void output() {
+        input();
+        for (int k=2;k<=n;k+=2) {
+            int cnt = 0;
+            for (int x1=1;x1<=n-k+1;x1++)
+                for (int y1=1;y1<=n-k+1;y1++) {
+                    int x2 = x1 + k - 1;
+                    int y2 = y1 + k - 1;
+                    int temp = sum[x2][y2] - sum[x2][y1-1] - sum[x1-1][y2] + sum[x1-1][y1-1];
+                    if (temp % 2 == 0)
+                        cnt++;
+                }
+            System.out.println(0);
+            System.out.println(cnt);
+        }
+    }
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        scan.nextLine();
+        sum = new int[n+1][n+1];
+        for (int i=1;i<=n;i++) {
+            String str = scan.nextLine();
+            for (int j=1;j<=n;j++) {
+                sum[i][j] = sum[i-1][j] + sum[i][j-1] -
+                        sum[i-1][j-1] + str.charAt(j-1) - '0';
+
+            }
+        }
+    }
+}
+class AkP1017 extends Problem {
+    int c;
+    int[][] sum;
+    int[] ansXY;
+    @Override
+    public void output() {
+        input();
+        ansXY = new int[2];
+        for (int x1=1;x1<=n-c+1;x1++)
+            for (int y1=1;y1<=k-c+1;y1++) {
+                int x2=x1+c-1;
+                int y2=y1+c-1;
+                int temp = sum[x2][y2] - sum[x1-1][y2] -sum[x2][y1-1] + sum[x1-1][y1-1];
+                if (temp >= ans) {
+                    ans = temp;
+                    ansXY = new int[]{x1,y1};
+                }
+            }
+        System.out.printf("%d %d",ansXY[0],ansXY[1]);
+    }
+
+    @Override
+    public void input() {
+        ans = Integer.MIN_VALUE;
+        n = scan.nextInt();
+        k = scan.nextInt();
+        c = scan.nextInt();
+        sum = new int[n+2][k+2];
+        for (int i=1;i<=n;i++)
+            for (int j=1;j<=k;j++) {
+                int temp = scan.nextInt();
+                sum[i][j] = sum[i-1][j] + sum[i][j-1] -sum[i-1][j-1] + temp;
+            }
+
+    }
+}
+class AkP1016 extends Problem {
+    int[][] s;
+    int[][] num;
+    @Override
+    public void output() {
+        input();
+        for (int l=1;l<=n;l++)
+            for (int l1=l;l1<=n;l1++)
+                for (int r=1;r<=n;r++)
+//                for (int l1=l;l1<=n;l1++)//注意这里从l开始，否则会逆算
+                    for (int r1=r;r1<=n;r1++) {
+                        int temp = s[l1][r1] - s[l1][r-1] - s[l-1][r1] + s[l-1][r-1];
+                        ans = Math.max(temp,ans);
+                    }
+        System.out.println(ans);
+    }
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        s = new int[n+1][n+1];
+        num = new int[n+1][n+1];
+
+        for (int i=1;i<=n;i++)
+            for (int j=1;j<=n;j++) {
+                num[i][j] = scan.nextInt();
+                s[i][j] = s[i-1][j] + s[i][j-1] - s[i-1][j-1] + num[i][j];
+            }
+
+    }
+}
+class Acw733 extends Problem {
+    String str;
+    int index = 1;
+    int[][] sum;
+    @Override
+    public void output() {
+//        System.out.println(str);
+        int cntAns = 0;
+        sum = new int[n+1][26];
+        for (int i=1;i<=n;i++) {
+            for (int j=0;j<26;j++) {
+                if (str.charAt(i-1) - 'A' == j)
+                    sum[i][j] = sum[i-1][j] + 1;
+                else
+                    sum[i][j] = sum[i-1][j];
+            }
+        }
+        while (k-->0) {
+            int l,r;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            int cnt = 0;
+
+            for (int i=0;i<26;i++) {
+                if ( (sum[r][i] - sum[l-1][i]) % 2 == 1) {
+                    cnt++;
+                }
+            }
+            if (cnt <= 1)
+                cntAns++;
+        }
+        System.out.printf("Case #%d: %d\n",index,cntAns);
+        index++;
+
+    }
+
+    @Override
+    public void input() {
+        scan = new Scanner(System.in);
+        T = scan.nextInt();
+        while (T-->0) {
+            n = scan.nextInt();
+            k = scan.nextInt();
+            scan.nextLine();//读掉n,k后要换行的回车
+            str = scan.nextLine();//会读取回车，下句多余
+//            scan.nextLine();
+            output();
+        }
+    }
+}
+class AkP1005 extends Problem {
+    int[] sum;
+    @Override
+    public void output() {
+        input();
+        while(k-->0) {
+            int l,r;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            if ((sum[r] - sum[l-1]) % 3 ==0)
+                System.out.println("YES");
+            else
+                System.out.println("NO");
+        }
+    }
+    @Override
+    public void input() {
+        scan = new Scanner(System.in);
+        n = scan.nextInt();
+        k = scan.nextInt();
+        nums = new int[n+1];
+        sum = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            nums[i] = scan.nextInt();
+            sum[i] = sum[i - 1] + sumOfEach(nums[i]);
+        }
+
+    }
+    public int sumOfEach(int nums) {
+        int res = 0;
+        while (nums!=0) {
+            res += nums%10;
+            nums/=10;
+        }
+        return res;
+    }
+}
+class AkP1014 extends Problem {
+    int[] sum;
+    @Override
+    public void output() {
+        input();
+        while(k-->0) {
+            int l,r;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            System.out.println(sum[r] - sum[l-1]);
+        }
+    }
+    @Override
+    public void input() {
+        scan = new Scanner(System.in);
+        n = scan.nextInt();
+        nums = new int[n+1];
+        sum = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            nums[i] = scan.nextInt();
+            sum[i] = sum[i - 1] + nums[i];
+        }
+        k = scan.nextInt();
+
+    }
+}
