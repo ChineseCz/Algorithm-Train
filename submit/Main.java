@@ -2,14 +2,14 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1012().input();
+        new AkP1022().input();
 
     }
 }
 
 abstract class Problem {
     Scanner scan = new Scanner(System.in);
-    int n,k,T;
+    int n,m,q,k,T;
     int[] nums;
     long ans;
     public abstract void input();
@@ -24,8 +24,225 @@ abstract class Problem {
     }
 
 }
-class lc1094 {
+class AkP1022 extends Problem {
+    int sco[];
+    @Override
+    public void input() {
+        m = scan.nextInt();
+        n = scan.nextInt();
+        sco = new int[m+1];//不能开多一位，因为会把最后的0排到前面
+        nums = new int[n+1];
+        for (int i=0;i<m;i++)
+            sco[i]  = scan.nextInt();
+        for (int i=0;i<n;i++)
+            nums[i] = scan.nextInt();
+        output();
+    }
 
+    @Override
+    public void output() {
+        Arrays.sort(sco);
+        for (int i=0;i<n;i++) {
+            ans += bisection(nums[i]);
+        }
+        System.out.println(ans);
+    }
+    public int bisection(int target) {
+        int l=0;
+        int r=m-1;
+        while (l < r) {
+            int mid = (l + r)/2;
+            if (sco[mid] >= target)
+                r = mid;
+            else
+                l = mid + 1;
+        }
+        int res;
+//        System.out.println(sco[l]);
+
+        if ( sco[l] >= target )
+            if (l!=0)
+                res = Math.min(target - sco[l-1],sco[l] - target);
+            else
+                res = sco[l] - target;
+        else
+            res = target - sco[l];
+//        System.out.println(res);
+        return res;
+    }
+}
+class AkP1020 extends Problem {
+    int target;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        nums = new int[n+1];
+        target = scan.nextInt();
+        for (int i=0;i<n;i++)
+            nums[i] = scan.nextInt();
+        output();
+    }
+
+    @Override
+    public void output() {
+        int l = 0,r = n-1;
+        while (l<r) {
+            int mid = (l+r)/2;
+            if (nums[mid] > target)
+                r = mid ;
+            else
+                l = mid + 1;
+        }
+        /* 找到第一个大于target的位置，为什么这样写不行呢，因为数组非递减！*/
+        if (l == 0) System.out.println(-1);
+        else if (nums[l-1] == target) System.out.println(l-1);
+        else System.out.println(-1);
+    }
+}
+class AkP1018 extends Problem {
+    int target;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        nums = new int[n+1];
+        target = scan.nextInt();
+        for (int i=0;i<n;i++)
+            nums[i] = scan.nextInt();
+        output();
+    }
+
+    @Override
+    public void output() {
+        int l = 0,r = n-1;
+        while (l<r) {
+            int mid = (l+r)/2;
+//            System.out.println(mid);
+            if (nums[mid] >= target)
+                r = mid ;
+            else
+                l = mid + 1;
+            /* 为什么不能这样写？
+                1. 因为（l+r)/2 是向下取整，总会靠左，当nums[l]不是target，而nums[r]是target时会死循环
+                2. 逻辑看似对，实际不对，不存在=时，大于的数被排除了，如 0 2 3，target为1
+            if (nums[mid] > target )
+                r = mid - 1;
+            else (nums[mid] <= target)
+                l = mid;
+                代码随想录是直接找target，按区间的两种模板，右端是否闭合，l都是mid+1，本质因为向下取整
+             */
+
+        }
+        if (nums[l] >= target) System.out.println(l);
+        else System.out.println(-1);
+    }
+}
+class AkP1015 extends Problem {
+    long[] dif;
+    long[] sum;
+    long[] nums;
+    public void add(int l,int r,int c) {
+        dif[l] += c;
+        dif[r+1] -= c;
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        q = scan.nextInt();
+        nums = new long[n+2];
+        dif = new long[n+2];
+        sum = new long[n+2];
+        for (int i=1;i<=n;i++) {
+            nums[i] = scan.nextLong();
+            dif[i] = nums[i] - nums[i - 1];
+        }
+        for (int i=0;i<m;i++) {
+            int l,r,c;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            c = scan.nextInt();
+            add(l,r,c);
+        }
+        for (int i=1;i<=n;i++) {
+            nums[i] = dif[i] + nums[i-1];
+            sum[i] = nums[i] + sum[i-1];
+        }
+        for (int i=0;i<q;i++) {
+            int l,r;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            System.out.println(sum[r]-sum[l-1]);
+        }
+    }
+
+    @Override
+    public void output() {
+
+    }
+}
+class Acw2041 extends Problem {
+    int[] dif;
+    public void add(int l,int r) {
+        dif[l]+=1;
+        dif[r+1]-=1;
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        dif = new int[n+2];
+        nums = new int[n+1];
+        for (int i=0;i<k;i++) {
+            int l,r;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            add(l,r);
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        for (int i=1;i<=n;i++) {
+            nums[i] = nums[i-1] + dif[i];
+        }
+        Arrays.sort(nums);
+        System.out.println(nums[n/2 + 1]);
+    }
+}
+class AkP1013 extends Problem {
+    int[] dif = new int[1000002];
+    public void add(int l,int r) {
+        dif[l] += 1;
+        dif[r+1] -= 1;
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        int left = Integer.MAX_VALUE,right=0;
+        nums = new int[1000002];//每个点监考的数量；
+        //如果nums作为收益，那么dif每次计算时，需要知道nums[i]的值，那需要求和，复杂度进而n^2
+        for (int i=0;i<n;i++) {
+            int l,r;
+            l = scan.nextInt();
+            r = scan.nextInt();
+            left = Math.min(left,l);
+            right = Math.max(right,r);
+            add(l,r);
+        }
+        for (int i=left;i<=right;i++) {
+            nums[i] = nums[i-1] + dif[i];
+            if (nums[i] == 0) ans++;
+            else if(nums[i] == 1) ans+=3;
+            else ans+=4;
+        }
+        System.out.println(ans);
+    }
+
+    @Override
+    public void output() {
+
+    }
 }
 class AkP1012 extends Problem {
     int[] dif;
