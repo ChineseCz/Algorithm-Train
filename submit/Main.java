@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1022().input();
+        new AkP1031().input();
 
     }
 }
@@ -23,6 +23,133 @@ abstract class Problem {
         }
     }
 
+}
+
+class AkP1031 extends Problem {
+    int p;
+    int[] root;
+    public int find(int x) {
+        if (x == root[x]) {
+            return x;
+        }
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y) {
+        int px = find(root[x]),py = find(root[y]);
+        if (px != py) {
+            root[px] = py;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        p = scan.nextInt();
+        root = new int[n+1];
+        for (int i=1;i<=n;i++)
+            root[i] = i;
+        for (int i=0;i<m;i++) {
+            int x = scan.nextInt();
+            int y = scan.nextInt();
+            merge(x,y);
+
+        }
+        for (int i = 0;i < p;i++) {
+            int x = scan.nextInt();
+            int y = scan.nextInt();
+            if (find(x) == find(y))
+                System.out.println("Yes");
+            else
+                System.out.println("No");
+        }
+    }
+
+    @Override
+    public void output() {
+
+    }
+}
+class AkP1030 extends Problem {
+    int[] p;
+    public void merge(int x,int y) {
+        int px = find(p[x]),py = find(p[y]);
+        if (px != py) {
+            p[px] = py;
+        }
+    }
+    public int find(int x) {
+        if (x == p[x]) {
+            return x;
+        }
+        else {
+            p[x] = find(p[x]);
+            return p[x];
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        p = new int[n+1];
+        for (int i=1;i<=n;i++)
+            p[i] = i;
+        m = scan.nextInt();
+        for (int i=0;i<m;i++) {
+            int z = scan.nextInt();
+            int x = scan.nextInt();
+            int y = scan.nextInt();
+            if (z == 1) {
+                merge(x,y);
+            }
+            else {
+                if (find(x) == find(y)) System.out.println("Y");
+                else System.out.println("N");
+            }
+        }
+    }
+
+    @Override
+    public void output() {
+
+    }
+}
+class AkP1021 extends Problem {
+    int C;
+    public boolean bisection(int str,int target) {
+        int l = str;
+        int r = n - 1;
+        while (l < r) {
+            int mid = (l + r) / 2;
+            if (nums[mid] >= target)
+                r = mid;
+            else
+                l = mid + 1;
+        }
+        return nums[l] == target;
+    }
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        C = scan.nextInt();
+        nums = new int[n];
+        for (int i=0;i<n;i++)
+            nums[i] = scan.nextInt();
+
+        Arrays.sort(nums);
+        output();
+    }
+
+    @Override
+    public void output() {
+        for (int i=0;i<n;i++) {
+            int goal = nums[i] + C;
+            if (bisection(i,goal)) ans++;
+        }
+        System.out.println(ans);
+    }
 }
 class AkP1022 extends Problem {
     int sco[];
@@ -687,7 +814,6 @@ class Ak1002 extends Problem{
         System.out.println(ans);
     }
 }
-
 class Acw4716 extends Problem {
     String team1,team2;
     public void input() {
@@ -768,8 +894,6 @@ class Ak1001 extends Problem {
         return Math.min(cnt2,cnt5) >= k;
     }
 }
-
-
 class Acw1230 extends Problem {
 
     @Override
