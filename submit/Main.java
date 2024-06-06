@@ -1,9 +1,10 @@
+
+import java.lang.runtime.SwitchBootstraps;
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1022().input();
-
+        new AkP1034().input();
     }
 }
 
@@ -12,17 +13,719 @@ abstract class Problem {
     int n,m,q,k,T;
     int[] nums;
     long ans;
+    String str;
     public abstract void input();
 
     public abstract void output();
-    public void numsInput() {
+
+}
+class AkP1034 extends Problem {
+    int[] lp,rp;
+    public int findl(int x) {
+        if (lp[x] == x)
+            return x;
+        else {
+            lp[x] = findl(lp[x]);
+            return lp[x];
+        }
+    }
+    public int findr(int x) {
+        if (rp[x] == x)
+            return x;
+        else {
+            rp[x] = findr(rp[x]);
+            return rp[x];
+        }
+    }
+    public void mergel(int x,int y) {
+        int rx = findl(x),ry = findl(y);
+        if (rx != ry) {
+            lp[rx] = ry;
+        }
+    }
+    public void merger(int x,int y) {
+        int rx = findr(x),ry = findr(y);
+        if (rx != ry) {
+            rp[rx] = ry;
+        }
+    }
+    @Override
+    public void input() {
         n = scan.nextInt();
-        nums = new int[n+1];
+        m = scan.nextInt();
+        scan.nextLine();
+        lp = new int[n+1];
+        rp = new int[n+1];
         for (int i=1;i<=n;i++) {
-            nums[i] = scan.nextInt();
+            lp[i] = i;
+            rp[i] = i;
+        }
+        //复杂度，Tlogn，因为构成树，最差的情况就是某次find的时候要不断递归找
+        for (int i=1;i<=m;i++) {
+            String[] input = scan.nextLine().split(" ");
+            char op = input[0].charAt(0);
+            int x = Integer.parseInt(input[1]);
+            switch (op) {
+                case 'Q':{
+                    int l = findl(x);
+                    int r = findr(x);
+                    System.out.print(l+" "+r+"\n");
+                    break;
+                }
+                case 'L':{
+                    if (x > 1) {
+                        mergel(x,x-1);
+                        merger(x-1,x);
+                    }
+                    break;
+                }
+                case 'R':{
+                    if (x < n) {
+                        merger(x,x+1);
+                        mergel(x+1,x);
+                    }
+                    break;
+                }
+            }
         }
     }
 
+    @Override
+    public void output() {
+
+    }
+}
+class AkP1032 extends Problem {
+    int[][] matrix;
+    int[] root;
+    int[] xsd;
+    public int find(int x) {
+        if (root[x] == x)
+            return x;
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y) {
+        int rx = find(x),ry = find(y);
+        xsd[ry] += matrix[x][y];//相通就该加，不要不同根再加
+        /* 举例
+            1,2 10
+            1,3 10
+            2,3 10，因为1通2，所以1通3时，2已通3，那么轮到2通3相似度会少加
+         */
+        if (rx != ry) {
+            xsd[ry] += xsd[rx];
+            root[rx] = ry;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        root = new int[n];
+        xsd = new int[n];
+        matrix = new int[n][n];
+        for (int i=0;i<n;i++)
+            root[i] = i;
+        for (int i=0;i<n;i++)
+            for (int j=0;j<n;j++) {//错误的写法 j = i+1;
+                matrix[i][j] = scan.nextInt();
+
+                if (matrix[i][j] > 0 && i<j ) {
+                    merge(i,j);
+                }
+            }
+        output();
+    }
+
+    @Override
+    public void output() {
+        List<Integer> ans = new ArrayList<>();
+        for (int i=0;i<n;i++) {
+            if (root[i] == i) {
+                ans.add(xsd[i]);
+            }
+        }
+        Collections.sort(ans,Comparator.reverseOrder());
+
+        for (int i=0;i<ans.size();i++)
+            System.out.print(ans.get(i)+" ");
+    }
+}
+class Acw1597 extends Problem {
+    int[] root;
+    int[] cnt;
+
+    ArrayList<ArrayList<Integer>> list  = new ArrayList<>();
+    public int find(int x) {
+        if (root[x] == x)
+            return x;
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y ) {
+        int rx = find(x),ry = find(y);
+        if (rx != ry) {
+            cnt[ry] += cnt[rx];
+            root[rx] = ry;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+
+        scan.nextLine();
+
+        root = new int[n+1];
+        cnt  = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            root[i] = i;
+            cnt[i] = 1;
+
+        }
+        for (int i=0;i<1001;i++)
+            list.add(new ArrayList<>());
+
+        for (int i=1;i<=n;i++) {
+            String[] input = scan.nextLine().split(": ");
+            int k = Integer.parseInt(input[0]);
+            String[] num = input[1].split(" ");
+            for (int j=0;j<k;j++) {
+                int hob = Integer.parseInt(num[j]);
+                list.get(hob).add(i);
+            }
+        }
+
+        output();
+    }
+
+    @Override
+    public void output() {
+        for (int i=1;i<=1000;i++) {
+            if (list.get(i).size()<2) continue;
+            else {
+                for (int j=0;j<list.get(i).size()-1;j++) {
+                    merge(list.get(i).get(j),list.get(i).get(j+1));
+                }
+            }
+        }
+        List<Integer> cnt1 = new ArrayList<>();
+        for (int i=1;i<=n;i++) {
+            if (root[i] == i) {
+                ans++;
+                cnt1.add(cnt[i]);
+            }
+        }
+        Collections.sort(cnt1,Collections.reverseOrder());
+        System.out.println(ans);
+        for (Integer num:cnt1)
+            System.out.printf("%d ",num);
+    }
+}
+class Acw3719 extends Problem {
+    int[] root;
+    public int find(int x) {
+        if (root[x] == x)
+            return x;
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y ) {
+        int rx = find(x),ry = find(y);
+        if (rx != ry) {
+            root[rx] = ry;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        root = new int[n+1];
+        for (int i=1;i<=n;i++)
+            root[i] = i;
+        for (int i=0;i<m;i++) {
+            int x = scan.nextInt();
+            int y = scan.nextInt();
+            merge(x,y);
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        int cnt = 0;
+        for (int i=1;i<=n;i++) {
+            if (root[i] == i) {
+                cnt++;
+            }
+        }
+        System.out.println(cnt-1);
+    }
+}
+class AkP1033 extends Problem {
+    public int find(int x) {
+        if (root[x] == x) {
+            return x;
+        }
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y) {
+        int rx = find(x),ry = find(y);
+        if (rx != ry) {
+            root[rx] = ry;
+        }
+    }
+    int[] root;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        root = new int[n];
+        for (int i=0;i<n;i++) {
+            root[i] = i;
+        }
+        for (int i=0;i<m;i++) {
+            int x,y;
+            x = scan.nextInt();
+            y = scan.nextInt();
+            merge(x,y);
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        for (int i=0;i<n;i++) {
+            if (root[i]==i) {
+                ans++;
+            }
+        }
+        System.out.println(ans);
+    }
+}
+class lc1482 {
+    int n,k,m;
+    int[] bloomDay;
+    public int minDays(int[] bloomDay, int m, int k) {
+        n = bloomDay.length;
+        this.k = k;
+        this.m = m;
+        this.bloomDay = bloomDay;
+        int l=0,r = (int)1e9;
+        if ((long)m*k>n) return -1;
+        while (l < r) {
+            int mid = (l + r)/2;
+            if (check(mid)) r = mid;
+            else l = mid + 1;
+        }
+        return l;
+    }
+    public boolean check(int goal) {
+        int cnt = 0;
+        int len = 0;
+
+        for (int r=0; r<n;r++) {
+            len = 0;
+            while (r<n && bloomDay[r]<=goal ) {
+                len++;
+                if (len == k) {
+                    cnt++;
+                    break;
+                }
+                r++;
+            }
+        }
+        return cnt>=m;
+    }
+}
+//这题非常考验对差分的理解！
+class AkP1029 extends Problem {
+    int[] dif;
+    int[] numscopy;
+    public void add(int l,int r,int c) {
+        dif[l]+=c;
+        dif[r+1]-=c;
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        k = scan.nextInt();
+        dif = new int[n+2];
+        nums = new int[n+1];
+        numscopy = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            nums[i] = scan.nextInt();
+            numscopy[i] = nums[i];
+            dif[i] = nums[i] - nums[i-1];
+        }
+        output();
+
+    }
+
+    @Override
+    public void output() {
+        int l = 1,r = (int)1e9;
+        while (l < r) {
+            int mid = (l+r+1)/2;
+            if (check(mid)) l = mid;
+            else r = mid - 1;
+        }
+        System.out.println(l);
+
+    }
+    //差分不可以边加，边复原数字吗
+    public boolean check(int goal) {
+        int cnt = 0;
+        for (int r=1;r<=n;r++) {
+            //这样写，其实最初的nums只用到了nums[0]
+            nums[r] = dif[r] + nums[r-1];
+            if (nums[r]<goal) {
+                add(r, Math.min(r + k - 1, n),goal - nums[r]);
+
+                cnt+=goal-nums[r];
+                if (cnt > m ) break;
+            }
+            nums[r] = dif[r] + nums[r-1];//这一句很重要，区间修改后，更新当前点
+        }
+
+//        System.out.print("goal = " + goal + '\n');
+//        System.out.print("cnt = " + cnt + '\n');
+//        System.out.println(Arrays.toString(nums));
+        //复原
+        for (int i=1;i<=n;i++) {
+            nums[i] = numscopy[i];
+            dif[i] = nums[i] - nums[i-1];
+        }
+
+        return cnt<=m;
+//        return min>=goal;
+    }
+}
+class AkP1028 extends Problem {
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        scan.nextLine();
+        str = scan.nextLine();
+        output();
+    }
+
+    @Override
+    public void output() {
+        int l = 1,r = (int)1e6;
+        while ( l < r) {
+            int mid = (l+r)/2;
+            if (check(mid)) {
+                r = mid;
+//                System.out.println(r);
+            }
+            else l = mid + 1;
+        }
+        System.out.println(l);
+    }
+    public boolean check(int goal) {
+        int cnt = 0;
+        for (int l=0,r=0;r<n;r++) {
+            if (str.charAt(r)=='W') {
+                r += goal - 1;
+                cnt++;
+            }
+        }
+        return cnt<=m;
+    }
+}
+class lc1552 extends Problem {
+    int[] pos;
+    int n,m;
+    int str = Integer.MAX_VALUE;
+    public int maxDistance(int[] position, int m) {
+        this.m = m;
+        pos = position;
+        Arrays.sort(pos);
+        int l=1,r = (int)1e9;
+        while (l < r) {
+            int mid = (l + r + 1) / 2;
+            if (check(mid)) l = mid;
+            else r = mid - 1;
+        }
+        return l;
+
+    }
+    public boolean check(int force) {
+        int cnt = m;
+        for (int l=0,r=1;r<pos.length;r++) {
+            if (pos[r] - pos[l] >= force ) {
+                l = r;
+                cnt--;
+            }
+        }
+        return cnt<=1;
+    }
+    @Override
+    public void input() {
+
+    }
+
+    @Override
+    public void output() {
+
+    }
+}
+//这题等解析，感觉题意不清楚，有问题
+class AkP1027 extends Problem {
+    int x;
+
+    public boolean check(int goal) {
+        int cnt = 0,cnt1;
+        int[][] sum = new int[goal][3];
+        cnt = (goal)*(goal+1)/2;
+        cnt1 = goal*(goal-1)/2 + 1;
+        return cnt1 >= x || cnt == x;
+        //逻辑:n长度的字符串只能有   [n,(n)*(n-1)/2 + 1] or n*(n+1)/2 个子回文串，好像左边不对
+
+    }
+    @Override
+    public void input() {
+        x = scan.nextInt();
+        output();
+    }
+
+    @Override
+    public void output() {
+        int l=1, r = x;
+        while (l < r) {
+            int mid = (l + r)/2;
+            if (check(mid)) r = mid;
+            else l = mid + 1;
+        }
+        n = l;//字符串长度
+        if (x == n*(n+1)/2)
+            for (int i=0;i<n;i++)
+                System.out.print('r');
+        else {
+            for (int i=1;i<=n;i++) {
+                int cur = i*(i+1)/2;
+                if (cur < x) System.out.print('r');
+                //下面不太合理
+                else {
+                    int res = x - i*(i-1)/2;
+                    for (int j=1;j<=res;j++) {
+                        if (j%3==1) System.out.print('e');
+                        else if (j%3==2) System.out.print('d');
+                        else System.out.print('r');
+                    }
+                }
+            }
+        }
+
+
+    }
+}
+class AkP1026 extends Problem {
+    String str;
+    Map<Character,Integer> map = new HashMap<>();
+    @Override
+    public void input() {
+        str = scan.nextLine();
+        for (int i=0;i<str.length();i++) {
+            map.put(str.charAt(i),map.getOrDefault(str.charAt(i),0) +1);
+        }
+        k = scan.nextInt();
+        output();
+    }
+
+    @Override
+    public void output() {
+        int l = 1, r = (int)1e9;
+        while ( l < r ) {
+            int mid = (l + r) / 2;
+            if (check(mid)) r = mid;
+            else l = mid + 1;
+
+        }
+        System.out.println(l);
+    }
+    /* 划分：f(str)<= k */
+    public boolean check(int goal) {
+        int len = 0;
+        int cnt = 0;
+        Set<Character> set = new HashSet<>();
+        for (int i=0;i<str.length();i++) {
+            set.add(str.charAt(i));
+            len++;
+            if (set.size()*len > goal ) {
+                len = 0;
+                set.clear();
+                i--;
+                cnt ++;
+            }
+        }
+        if (!set.isEmpty()) cnt++;
+        return cnt <= k;
+    }
+}
+class AkP1025 extends Problem {
+    String[] strNum;
+    long sum;
+    long cnt;
+    @Override
+    public void input() {
+        strNum = scan.nextLine().split(" ");
+        nums = new int[strNum.length];
+        for (int i=0;i<strNum.length;i++) {
+            nums[i] = Integer.parseInt(strNum[i]);
+            sum += nums[i];
+        }
+
+        cnt = scan.nextLong();
+        if (sum <= cnt) System.out.println(-1);
+        else output();
+    }
+
+    @Override
+    public void output() {
+        int l = 0,r = (int)1e9;
+        while ( l < r) {
+            int mid = (l + r + 1)/2;
+            if (check(mid)) l = mid;
+            else r = mid - 1;
+        }
+        System.out.println(l);
+    }
+    public boolean check(int value) {
+        long sum = 0;
+        for (int i=0;i<nums.length;i++) {
+            if (nums[i] < value) sum += nums[i];
+            else {
+                sum += value;
+            }
+        }
+        return sum<=cnt;
+    }
+}
+class AkP1024 extends Problem {
+    long k;
+    long[] nums;
+    long total,minl = Long.MAX_VALUE;
+    long l,r;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        nums = new long[n];
+        for (int i=0;i<n;i++) {
+            nums[i] = scan.nextLong();
+            total += nums[i];
+            minl = Math.min(minl,nums[i]);
+        }
+        if (total < k) System.out.println(0);//按每段1都切不出来
+        else output();
+    }
+
+    @Override
+    public void output() {
+        l = 0;
+        r = minl;//这为什么不行？——最短的不一定要用啊，可能就只用一根特别长的，就是最长的k段
+        while (l < r) {
+            long mid = (l + r + 1)/2;
+            if (check(mid)) l = mid;
+            else r = mid - 1;
+        }
+        System.out.println(l);
+    }
+    //假设maxMin为goal
+    public boolean check(long goal) {
+        long cnt = 0;
+        for (int i=0;i<n;i++) {
+            cnt += nums[i]/goal;
+        }
+//        System.out.println(cnt);
+        return cnt >= k;
+    }
+}
+class AkP1023 extends Problem {
+    long a,b,n;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        a = scan.nextInt();
+        b = scan.nextInt();
+        output();
+    }
+
+    @Override
+    public void output() {
+        long l = 1,r = (a + b) / n;
+        while ( l < r ) {
+            long mid = (l+r+1)/2;//最小值最大化，取中间靠右侧
+            if (check(mid)) l = mid;
+            else r = mid - 1;
+        }
+        System.out.println(l);
+    }
+    //假设maxMin为goal
+    public boolean check(long goal) {
+        if (a/goal + b/goal >= n) {
+            return true;
+        }
+        return false;
+    }
+}
+class AkP1021 extends Problem {
+    int C;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        C = scan.nextInt();
+        nums = new int[n];
+        for (int i=0;i<n;i++)
+            nums[i] = scan.nextInt();
+        Arrays.sort(nums);
+        output();
+    }
+
+    @Override
+    public void output() {
+        for (int i=0;i<n;i++) {
+            ans += bisection(i,nums[i] + C);
+        }
+        System.out.println(ans);
+    }
+    public int bisection(int str,int goal) {
+        int res = 0;
+        int l = str, r = n-1;
+        while ( l < r) {
+            int mid = (l + r) / 2;
+            if (nums[mid] >= goal)
+                r = mid;
+            else
+                l = mid + 1;
+        }
+        if (nums[l] == goal) {
+            int l_pre = l;
+            r = n-1;
+            while (l < r) {
+                int mid = (l + r ) / 2;
+                if (nums[mid] > goal)
+                    r = mid;
+                else
+                    l = mid + 1;
+            }
+            if (nums[l] > goal) res = l - l_pre;
+            else res = l - l_pre + 1;
+        }
+        return res;
+    }
 }
 class AkP1022 extends Problem {
     int sco[];
@@ -644,7 +1347,7 @@ class AkP1009 extends  Problem {
 class Acw3771 extends Problem {
     @Override
     public void input() {
-        numsInput();//nums为价值
+//        numsInput();//nums为价值
     }
     public void output() {
         input();
@@ -662,7 +1365,7 @@ class Acw3771 extends Problem {
     }
 }
 /* 本题用Set结构更好 */
-class Ak1002 extends Problem{
+class AkP1002 extends Problem{
     public void input() {
 //        scan = new Scanner(System.in);
         n = scan.nextInt();
@@ -720,7 +1423,7 @@ class Acw4716 extends Problem {
         }
     }
 }
-class Ak1001 extends Problem {
+class AkP1001 extends Problem {
     int[] nums2,nums5;
     long ans =0;
     int cnt2=0,cnt5=0;
