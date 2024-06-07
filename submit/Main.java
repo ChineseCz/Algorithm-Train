@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1034().input();
+        new AkP1036().input();
     }
 }
 
@@ -18,6 +18,47 @@ abstract class Problem {
 
     public abstract void output();
 
+}
+class AkP1036 extends Problem {
+    int[] c;
+    int max;
+    public int lowbit(int x) {
+        return x&-x;
+    }
+    public void add(int x) {
+        for (int i=x;i<=max;i+=lowbit(i)) {
+            c[i] += 1;
+        }
+    }
+    public long query(int x) {
+        long ans = 0;
+        for (int i=x;i>0;i-=lowbit(i)) {
+            ans += c[i];
+        }
+        return ans;
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        nums = new int[n+1];//nums最大值可以大于n
+
+        for (int i=1;i<=n;i++) {
+            nums[i] = scan.nextInt();
+            max = Math.max(nums[i],max);
+        }
+        c = new int[max+1];
+        for (int i=n;i>=1;i--) {
+            ans += query(nums[i]-1);
+            add(nums[i]);
+        }
+        System.out.println(ans);
+
+    }
+
+    @Override
+    public void output() {
+
+    }
 }
 class AkP1034 extends Problem {
     int[] lp,rp;
@@ -95,6 +136,7 @@ class AkP1034 extends Problem {
 
     }
 }
+
 class AkP1032 extends Problem {
     int[][] matrix;
     int[] root;
