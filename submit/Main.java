@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1031().input();
+        new AkP1101().input();
 
     }
 }
@@ -24,7 +24,34 @@ abstract class Problem {
     }
 
 }
+class AkP1101 extends Problem {
 
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        nums = new int[n+10];
+        nums[1] = 1;
+        nums[2] = 1;
+        fb1(n);
+//        output();
+    }
+
+    @Override
+    public void output() {
+        System.out.println(fb(n));
+    }
+    public void fb1(int n) {
+        for (int i=3;i<=n;i++) {
+            nums[i] = nums[i-1] + nums[i-2];
+        }
+        System.out.println(nums[n]);
+    }
+    public int fb(int n) {
+        if (n == 1 || n == 2) return 1;
+
+        return fb(n-1) + fb(n-2);
+    }
+}
 class AkP1031 extends Problem {
     int p;
     int[] root;
