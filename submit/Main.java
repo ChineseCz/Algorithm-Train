@@ -38,36 +38,28 @@ class AkP1041 extends Problem {
         output();
     }
     public void dfs1(int x) {
-        if (x == 1) {
-            if (flag > 0 && !fx) {
-                fx = true;
-                System.out.println(1);
-            }
-            else System.out.println(flag);
+        if (x <= 1) {
+            if (x== 1) System.out.print(x*flag);
+            return;
         }
         int mi = (int)(Math.log(x)/Math.log(3));
         int limit =(int) (Math.pow(3,mi+1) - 1 )/2;
         if (x > limit) {
             int out = (int)Math.pow(3,mi+1);
-            if (flag == 1 && !fx) {
-                fx = true;
-                System.out.println(out);
-            }
-            else System.out.println(out*flag);
-            flag = -1;//记录其实要负值
-            dfs(out - x);//传绝对值
+            if (flag == 1 && fx) System.out.print('+');
 
+            System.out.print(out*flag);
+            flag = -1;//记录其实要负值
+            fx = true;
+            dfs1(out - x);//传绝对值
         }
         else {
             int out = (int)Math.pow(3,mi);
-            if (flag == 1 && !fx) {
-                fx = true;
-                System.out.println(out);
-            }
-            else System.out.println(out*flag);
+            if (flag == 1) System.out.print('+');
+            System.out.print(out*flag);
             flag = 1;
-            dfs(x-out);
-
+            fx = true;
+            dfs1(x-out);
         }
     }
     //错误思路
