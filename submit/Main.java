@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1101().input();
+        new AkP1041().input();
 
     }
 }
@@ -23,6 +23,115 @@ abstract class Problem {
         }
     }
 
+}
+
+class AkP1041 extends Problem {
+    int x;
+    int flag = 1;
+    boolean fx = false;
+    @Override
+    public void input() {
+        x = scan.nextInt();
+
+        int res = x;
+        dfs1(x);
+        output();
+    }
+    public void dfs1(int x) {
+        if (x == 1) {
+            if (flag > 0 && !fx) {
+                fx = true;
+                System.out.println(1);
+            }
+            else System.out.println(flag);
+        }
+        int mi = (int)(Math.log(x)/Math.log(3));
+        int limit =(int) (Math.pow(3,mi+1) - 1 )/2;
+        if (x > limit) {
+            int out = (int)Math.pow(3,mi+1);
+            if (flag == 1 && !fx) {
+                fx = true;
+                System.out.println(out);
+            }
+            else System.out.println(out*flag);
+            flag = -1;//记录其实要负值
+            dfs(out - x);//传绝对值
+
+        }
+        else {
+            int out = (int)Math.pow(3,mi);
+            if (flag == 1 && !fx) {
+                fx = true;
+                System.out.println(out);
+            }
+            else System.out.println(out*flag);
+            flag = 1;
+            dfs(x-out);
+
+        }
+    }
+    //错误思路
+    public void dfs(int x) {
+        int mi = 1;
+        if (Math.abs(x) == 1 || Math.abs(x) == 3) {
+            System.out.println(Math.abs(x));
+            return;
+        }
+        while (Math.pow(3,mi)<Math.abs(x)) {
+            mi++;
+        }
+
+        int temp = (int)Math.pow(3,mi-1);
+        int temp1 = (int)Math.pow(3,mi);
+
+        if (temp1 - Math.abs(x) > Math.abs(x) - temp) {
+            System.out.print(temp);
+            if (x > 0) {
+                System.out.print("+");
+                dfs(x - temp);
+            }
+            else {
+                System.out.print("-");
+                dfs(-x - temp);
+            }
+        }
+        else {
+            System.out.print(temp1);
+            if (x > 0) {
+                System.out.print("-");
+                dfs(x - temp1);
+            }
+            else {
+                System.out.print("+");
+                dfs( x + temp1);
+            }
+        }
+
+
+    }
+    @Override
+    public void output() {
+
+    }
+}
+/* 递归的二叉结构，问题可化为同类子问题，调用自身解决 */
+class Acw3695 extends Problem {
+    long k;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextLong();
+        output();
+    }
+    public int dfs(int n,long k) {
+        if (n == 1 || k % 2 != 0) return 1;
+        else return dfs(n-1,k/2) + 1;
+    }
+    @Override
+    public void output() {
+        ans = dfs(n,k);
+        System.out.println(ans);
+    }
 }
 class AkP1101 extends Problem {
 
@@ -860,8 +969,8 @@ class Acw4716 extends Problem {
         }
         List<Map.Entry<String,Integer>> list = new ArrayList<>(map.entrySet());
         Collections.sort(list,new mapCompare());
-        System.out.println(list.getFirst().getKey());
-//
+//        System.out.println(list.getFirst().getKey());不该注释
+
 //        if (team2 == null) return team1;
 //        return map.get(team1)>map.get(team2)?team1:team2;
 
