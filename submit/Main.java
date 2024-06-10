@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1041().input();
+        new AkP1045().input();
 
     }
 }
@@ -12,6 +12,7 @@ abstract class Problem {
     int n,m,q,k,T;
     int[] nums;
     long ans;
+    String str;
     public abstract void input();
 
     public abstract void output();
@@ -24,7 +25,139 @@ abstract class Problem {
     }
 
 }
+class Acw92 extends Problem {
 
+    @Override
+    public void input() {
+
+    }
+
+    @Override
+    public void output() {
+
+    }
+}
+class AkP1045 extends Problem {
+    Set<String> set = new HashSet<>();
+    @Override
+    public void input() {
+        str = scan.nextLine();
+        n = str.length();
+        dfs(0,0,"");
+        output();
+    }
+    public void dfs(int u,int flag,String t) {
+        if (u == n) {
+            if (!t.isEmpty()) {
+                if (t.contains("bengtie")) {
+//                    System.out.println(t);
+                    ans++;
+                }
+                return;
+            }
+        }
+        else {
+            if (flag == 0) dfs(u+1,1,t);
+            dfs(u+1,0,t+str.charAt(u));
+        }
+    }
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
+}
+class AkP1044 extends Problem {
+    List<String> ans = new ArrayList<>();
+    @Override
+    public void input() {
+        str = scan.nextLine();
+        n = str.length();
+        dfs(0,"");
+        Collections.sort(ans);
+        for (String str:ans) {
+            System.out.println(str);
+        }
+    }
+    public void dfs(int u,String t) {
+        if (u == n) {
+            if (!t.isEmpty()) {
+                ans.add(t);
+            }
+            return;
+        }
+        else {
+
+            dfs(u+1,t+str.charAt(u));
+            dfs(u+1,t);
+        }
+    }
+    @Override
+    public void output() {
+
+    }
+}
+//此题有疑惑
+class AkP1042 extends Problem {
+    int bx,by,hx,hy;
+    //右下左上
+    int[] dx = {0,1};
+    int[] dy = {1,0};
+    int[][] limit = new int[12][12];
+
+
+    @Override
+    public void input() {
+        bx = scan.nextInt();
+        by = scan.nextInt();
+        hx = scan.nextInt();
+        hy = scan.nextInt();
+        init();
+
+        ans = dfs(0,0);
+
+        output();
+    }
+    public int dfs(int x,int y) {
+        int cnt = 0;
+
+
+
+        if (x > bx || y > by || limit[x][y] == 1) return 0;
+
+        if (x == bx && y == by) return 1;//这句必须在return 0之后？为什么，马控制区可能在目标点处
+
+        for (int i=0;i<2;i++) {
+            int nx = x,ny = y;
+            nx += dx[i];
+            ny += dy[i];
+            cnt += dfs(nx,ny);
+        }
+
+        return cnt;
+
+    }
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
+    public void init() {
+        if (hx>=1 && hy>=2) limit[hx-1][hy-2] = 1;
+        if (hx>=1 && hy<=8) limit[hx-1][hy+2] = 1;
+        if (hx<=9 && hy>=2) limit[hx+1][hy-2] = 1;
+        if (hx<=9 && hy<=8) limit[hx+1][hy+2] = 1;
+        if (hx>=2 && hy>=1) limit[hx-2][hy-1] = 1;
+        if (hx>=2 && hy<=9) limit[hx-2][hy+1] = 1;
+        if (hx<=8 && hy>=1) limit[hx+2][hy-1] = 1;
+        if (hx<=8 && hy<=9) limit[hx+2][hy+1] = 1;
+        limit[hx][hy] = 1;
+    }
+
+}
+
+/* 进制类题
+    借位判断 + 递归
+    可表示证明：3^0+~+3^i，不够时借位，再减去，直到足够
+ */
 class AkP1041 extends Problem {
     int x;
     int flag = 1;
@@ -39,7 +172,11 @@ class AkP1041 extends Problem {
     }
     public void dfs1(int x) {
         if (x <= 1) {
-            if (x== 1) System.out.print(x*flag);
+
+            if ( x == 1 ) {
+                if (flag == 1 && fx) System.out.print('+');
+                System.out.print(x*flag);
+            }
             return;
         }
         int mi = (int)(Math.log(x)/Math.log(3));
@@ -49,15 +186,14 @@ class AkP1041 extends Problem {
             if (flag == 1 && fx) System.out.print('+');
 
             System.out.print(out*flag);
-            flag = -1;//记录其实要负值
+            flag *= -1;//借位，溢出需变符号
             fx = true;
             dfs1(out - x);//传绝对值
         }
         else {
             int out = (int)Math.pow(3,mi);
-            if (flag == 1) System.out.print('+');
+            if (flag == 1 && fx) System.out.print('+');
             System.out.print(out*flag);
-            flag = 1;
             fx = true;
             dfs1(x-out);
         }
@@ -107,6 +243,34 @@ class AkP1041 extends Problem {
     }
 }
 /* 递归的二叉结构，问题可化为同类子问题，调用自身解决 */
+class AkP1040 extends Problem {
+    int[][] tr;
+    long k;
+    @Override
+    public void input() {
+        T = scan.nextInt();
+        while(T-->0) {
+            n = scan.nextInt();
+            k = scan.nextLong();
+            ans = dfs(n,k);
+            output();
+        }
+    }
+    public int dfs(int n,long k) {
+        if (n == 1) return 0;
+        else if (k % 2 ==0)
+            return 1 - dfs(n-1,k/2);
+        else
+            return dfs(n-1,k/2);
+    }
+
+    @Override
+    public void output() {
+        if (ans == 0) System.out.println("red");
+        else System.out.println("blue");
+    }
+}
+
 class Acw3695 extends Problem {
     long k;
     @Override
