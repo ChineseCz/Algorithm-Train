@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1045().input();
+        new AkP1046().input();
 
     }
 }
@@ -16,25 +16,122 @@ abstract class Problem {
     public abstract void input();
 
     public abstract void output();
-    public void numsInput() {
-        n = scan.nextInt();
-        nums = new int[n+1];
-        for (int i=1;i<=n;i++) {
-            nums[i] = scan.nextInt();
-        }
-    }
+
 
 }
-class Acw92 extends Problem {
+class AkP1047 extends Problem {
 
     @Override
     public void input() {
-
+        n = scan.nextInt();
+        nums = new int[n+1];
+        for (int i=1;i<=n;i++)
+            nums[i] = scan.nextInt();
     }
 
     @Override
     public void output() {
 
+    }
+}
+class AkP1046 extends Problem {
+    int[] pre;
+    int x;
+
+    @Override
+    public void input() {
+        x = scan.nextInt();
+//        dfs(1,"",0);
+//        if (ans == 0) System.out.println(-1);
+//        else System.out.println(ans);
+        output();//迭代法
+
+    }
+
+    public void dfs(int u,String t,int sum) {
+        if (u == 10 || sum >= x) {
+            if (sum == x) {
+                int tmp = Integer.parseInt(t);
+//                System.out.println(tmp);
+                ans = Math.max(tmp,ans);
+            }
+        }
+        else {
+            dfs(u+1,u+t,sum + u);
+            dfs(u+1,t,sum);
+        }
+    }
+    @Override
+    public void output() {
+        for (int s = 1;s <= (1<<9) - 1;s++) {
+            List<Integer> ans =  new ArrayList<>();
+            int sum = 0;
+            for (int i = 0;i< 9;i++) {//可以改成从高位枚举，就不用倒着输出
+                boolean flag = ((s >> i) & 1) == 1;
+                if (flag) {
+                    ans.add(i+1);
+                    sum+=i+1;
+
+                }
+            }
+            if (sum == x) {
+                StringBuilder t = new StringBuilder();
+                for (int i = ans.size()-1;i>=0;i--) {
+                    t.append(ans.get(i));
+                }
+//                System.out.println(t.toString());
+                int max = Integer.parseInt(t.toString());
+                this.ans = Math.max(this.ans,max);
+
+            }
+
+        }
+        if (ans != 0) System.out.println(ans);
+        else System.out.println(-1);
+
+    }
+}
+class Acw92 extends Problem {
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+//        dfs(1,"");
+        output();
+    }
+    public void dfs(int u,String t) {
+        if (u == n + 1) {
+            System.out.println(t);
+        }
+        else {
+            dfs(u+1,t);
+            dfs(u+1,t+ u + " ");
+        }
+
+    }
+
+    @Override
+    public void output() {
+//        System.out.println(" ");
+        for (int i = 1;i <= (1<<n);i++) {
+            List<Integer> ans = new ArrayList<>();
+            for (int j=0;j<n;j++) {//000各个位置对应321
+                boolean flag = (((i>>j)&1) == 1);
+                if (flag)  {
+                    ans.add(j);
+                }
+            }
+            for (int j=1;j<=n;j++) {//000各个位置对应123
+                boolean flag = ((i<<j)&(int)Math.pow(2,n)) == (int)Math.pow(2,n);
+                if (flag) {
+                    ans.add(j);
+                }
+            }
+            for (Integer num:ans) {
+                System.out.print(num+" ");
+            }
+            System.out.println();//相当于空集了
+        }
     }
 }
 class AkP1045 extends Problem {
@@ -1063,7 +1160,11 @@ class AkP1009 extends  Problem {
 class Acw3771 extends Problem {
     @Override
     public void input() {
-        numsInput();//nums为价值
+        n = scan.nextInt();
+        nums = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            nums[i] = scan.nextInt();
+        }
     }
     public void output() {
         input();
