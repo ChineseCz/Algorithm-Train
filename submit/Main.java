@@ -2,7 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1046().input();
+        new AkP1047().input();
 
     }
 }
@@ -20,18 +20,35 @@ abstract class Problem {
 
 }
 class AkP1047 extends Problem {
-
+    long[] nums;
     @Override
     public void input() {
         n = scan.nextInt();
-        nums = new int[n+1];
+        nums = new long[n+1];
         for (int i=1;i<=n;i++)
-            nums[i] = scan.nextInt();
+            nums[i] = scan.nextLong();
+        output();
+    }
+    //其实ans加上满足和大于等于0的集合中元素个数即可
+    public void dfs(int u,long sum,int i,boolean flagi) {
+        if (u == n + 1) {
+            if (sum >= 0 && flagi) {
+                ans ++;
+            }
+        }
+        else {
+            dfs(u+1,sum,i,flagi);
+            if (u == i) flagi = true;
+            dfs(u+1,sum+nums[u],i,flagi);
+
+        }
     }
 
     @Override
     public void output() {
-
+        for (int i=1;i<=n;i++)
+            dfs(1,0,i,false);
+        System.out.println(ans);
     }
 }
 class AkP1046 extends Problem {
