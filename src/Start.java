@@ -1,3 +1,9 @@
+/* 授权成功
+您的免费API Key为: sk-CQAw9uxMjdAF2jD5nB5f1kReVnjigqKldWHCdyftMseY9o0A
+请妥善保管，不要泄露给他人，如泄漏造成滥用可能会导致Key被封禁
+ */
+
+
 import java.util.Scanner;
 
 public class Start {
