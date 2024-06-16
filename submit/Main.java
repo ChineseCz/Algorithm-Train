@@ -2,8 +2,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1047().input();
-
+        new AkP1070().input();
     }
 }
 
@@ -18,6 +17,553 @@ abstract class Problem {
     public abstract void output();
 
 
+}
+class AkP1071 extends Problem {
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    long res = Integer.MAX_VALUE;
+    public void query(int n,int m) {
+        char[][] mat = new char[n][m];
+        for (int i = 0;i<n;i++) {
+            for (int j=0;j<m;j++ ) {
+                int index = i*m + j;
+                mat[i][j] = str.charAt(index);
+            }
+        }
+        boolean[][] visit = new boolean[n][m];
+        int cnt = 0;
+        for (int i = 0;i<n;i++) {
+            for (int j=0;j<m;j++ ) {
+                if (!visit[i][j]) {
+                    dfs(i, j, mat[i][j], n, m, visit, mat);
+                    cnt++;
+                }
+            }
+        }
+//        System.out.println(cnt);
+        res = Math.min(cnt,res);
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        scan.nextLine();
+        str = scan.nextLine();
+
+        for (int k=1;k<=n;k++) {
+            int row = 0,col = 0;
+            if (n % k == 0) {
+                row = k;
+                col = n/k;
+                query(row,col);
+            }
+        }
+        output();
+    }
+    public void dfs(int x,int y,char c,int n,int m,boolean[][] visit,char[][] mat) {
+        if (x < 0 || y< 0 || x == n || y == m || mat[x][y] != c ||  visit[x][y])
+            return;
+        visit[x][y] = true;
+        for (int i=0;i<4;i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            dfs(nx,ny,c,n,m,visit,mat);
+        }
+
+    }
+    @Override
+    public void output() {
+        System.out.println(res);
+    }
+}
+class AkP1070 extends Problem {
+    int[] dx = {-1,0,1,0,-1,-1,1,1};
+    int[] dy = {0,-1,0,1,-1,1,-1,1};
+    int[][] mat;
+    int cnt;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        mat = new int[n][m];
+        for (int i=0;i<n;i++)
+            for (int j=0;j<m;j++)
+                mat[i][j] = scan.nextInt();
+
+        /*疑惑：连续性传染，与从哪里开始感染无关，只是传染的方向不同
+            本质就是连通快
+        */
+        for (int i=0;i<n;i++) {
+            for (int j = 0; j < m; j++) {
+                if (mat[i][j] == 1 ) {
+                    dfs(i,j);
+                    ans++;
+                }
+            }
+        }
+        System.out.println(ans);
+
+    }
+    public void dfs(int x,int y) {
+        if (x < 0 || y < 0 || x== n || y == m || mat[x][y] == 0) {
+            return;
+        }
+        mat[x][y] = 0;
+        for (int i=0;i<8;i++) {
+            int cx = x + dx[i];
+            int cy = y + dy[i];
+            dfs(cx,cy);
+        }
+    }
+    @Override
+    public void output() {
+
+    }
+}
+class AkP1069 extends Problem {
+    char[][] mat,mat1;
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    boolean[][] visit;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        scan.nextLine();
+        mat = new char[n][m];
+        mat1 = new char[n][m];
+        for (int i=0;i<n;i++) {
+            String[] t = scan.nextLine().split(" ");
+            for (int j = 0; j < m; j++) {
+                mat[i][j] = t[j].charAt(0);
+                mat1[i][j] = t[j].charAt(0);
+            }
+        }
+        for (int i = 0; i < n;i++) {
+            for (int j = 0; j < m; j++) {
+
+                mat1[i][j] = 'W';
+                int cnt = 0;
+                boolean[][] visit = new boolean[n][m];
+                for (int i1 = 0; i1 < n; i1++) {
+                    for (int j1 = 0; j1 < m; j1++) {
+                        if (mat1[i1][j1] == 'R' && !visit[i1][j1]) {
+                            dfs(i1, j1, visit);
+                            cnt++;
+                        }
+                    }
+                }
+                System.out.print(cnt + " ");
+                if (mat[i][j] == 'R') mat1[i][j] = 'R';
+
+            }
+            System.out.println();
+        }
+    }
+    public void dfs(int x,int y,boolean[][] visit) {
+        if (x < 0 || y < 0 || x == n || y == m || mat1[x][y] == 'W' || visit[x][y])
+            return;
+        visit[x][y] = true;
+
+        for (int k = 0;k<4;k++) {
+            int cx = x + dx[k];
+            int cy = y + dy[k];
+            dfs(cx,cy,visit);
+        }
+
+    }
+
+    @Override
+    public void output() {
+
+    }
+}
+class AkP1068 extends Problem {
+    int res,res1;
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    char[][] mat;
+    char[][] mat1;
+    boolean[][] visit;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        scan.nextLine();
+        mat = new char[n][m];
+        mat1 = new char[n][m];
+        visit = new boolean[n][m];
+
+        for (int i=0;i<n;i++) {
+            String t = scan.nextLine();
+            for (int j = 0; j < m; j++) {
+                mat[i][j] = t.charAt(j);
+                mat1[i][j] = t.charAt(j);
+                if (mat1[i][j] == 'G') mat1[i][j] = 'B';
+            }
+        }
+//        System.out.println(Arrays.deepToString(mat));
+//        System.out.println(Arrays.deepToString(mat1));
+        for (int i=0;i<n;i++)
+            for (int j=0;j<m;j++) {
+                if (!visit[i][j]) {
+                    dfs(i, j, mat, mat[i][j]);
+                    res++;
+                }
+
+            }
+
+        for (int i =0;i<n;i++)
+            Arrays.fill(visit[i],false);
+
+        for (int i=0;i<n;i++)
+            for (int j=0;j<m;j++) {
+                if (!visit[i][j]) {
+                    dfs(i, j, mat1, mat1[i][j]);
+                    res1++;
+                }
+            }
+        output();
+    }
+    public void dfs(int x,int y,char[][] matrix,char color) {
+        if (x < 0 || y < 0 || x >= n || y >= m || matrix[x][y] != color || visit[x][y] )
+            return;
+        visit[x][y] = true;
+        for (int k = 0;k<4;k++) {
+            int cx = x + dx[k];
+            int cy = y + dy[k];
+            dfs(cx,cy,matrix,matrix[x][y]);
+        }
+
+    }
+
+    @Override
+    public void output() {
+        System.out.println(res - res1);
+    }
+}
+//并查集 + DFS两种写法，一般二维坐标建议DFS
+class lc200{
+    int n,m,ans;
+    int[] root;
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    class SolutionDisjoint {
+        public void merge(int x,int y) {
+            int rx = find(x),ry = find(y);
+            if (rx != ry) {
+                root[rx] = ry;
+            }
+        }
+        public int find(int x) {
+            if (root[x] == x) {
+                return x;
+            }
+            else {
+                root[x] = find(root[x]);
+                return root[x];
+            }
+        }
+        public int numIslands(char[][] grid) {
+            n = grid.length;
+            m = grid[0].length;
+            for (int i=0;i<n*m;i++)
+                root[i] = i;
+            for (int i=0;i<n;i++)
+                for (int j=0;j<m;j++) {
+                    if (grid[i][j] == '1') {
+                        for (int k=0;k<4;k++){
+                            int cx = i + dx[k];
+                            int cy = j + dy[k];
+                            if (cx >=0 && cy >=0 && cx <n && cy < m && grid[cx][cy] == '1') {
+                                int tmp = cx * m + cy;
+                                int ctmp = i*m + j;
+                                merge(ctmp,tmp);
+                            }
+                        }
+                    }
+                }
+            for (int i=0;i<n*m;i++)
+                if (root[i] == i)
+                    ans++;
+            return ans;
+        }
+    }
+    class SolutionDfs {
+        public int numIslands1(char[][] grid) {
+            n = grid.length;
+            m = grid[0].length;
+            for (int i=0;i<n;i++)
+                for (int j=0;j<m;j++) {
+                    if (grid[i][j] == '1') {
+                        dfs(i,j,grid);
+                        ans++;
+                    }
+                }
+            return ans;
+        }
+        public void dfs(int x,int y,char[][] grid) {
+            if (x < 0 || y < 0 || x == n || y == m || grid[x][y] == '0')
+                return;
+            grid[x][y] = '0';//标记为访问过
+            for (int k=0;k<4;k++) {
+                int cx = x + dx[k];
+                int cy = y + dy[k];
+                dfs(cx,cy,grid);
+            }
+        }
+    }
+
+}
+class AkP1050 extends Problem {
+    int[] num;
+    int[] sum = new int[4];
+    List<Integer> list1 = new ArrayList<>();
+    List<Integer> list2 = new ArrayList<>();
+    List<Integer> list3 = new ArrayList<>();
+    @Override
+    public void input() {
+        ans = 15*(int)1e5;
+        n = scan.nextInt();
+        nums = new int[n + 1];
+        num = new int[n+1];
+        for (int i = 1; i <= n; i++)
+            nums[i] = scan.nextInt();
+        Arrays.sort(nums);
+        for (int j=1,i= n; i >= 1; i--) {
+            num[i] = nums[j];
+            j++;
+        }
+        dfs(1);
+        output();
+
+
+    }
+    public void dfs(int u) {
+        if (u == n + 1) {
+            if (!list1.isEmpty() && !list2.isEmpty() && !list3.isEmpty()) {
+
+
+                if (sum[1] > sum[2] && sum[2] > sum[3]) {
+                    int res = sum[1] - sum[3];
+                    ans = Math.min(ans,res);
+                }
+            }
+        }
+        else {
+            //放入一等
+            sum[1] += nums[u];
+            list1.add(nums[u]);
+            dfs(u+1);
+            sum[1] -= nums[u];//回溯到未放入一等状态
+            list1.remove((Integer) nums[u]);
+            //放入二等
+            sum[2] += nums[u];
+            list2.add(nums[u]);
+            dfs(u+1);
+            sum[2] -= nums[u];
+            list2.remove((Integer) nums[u]);
+            //放入三等
+            sum[3] += nums[u];
+            list3.add(nums[u]);
+            dfs(u+1);
+            sum[3] -= nums[u];
+            list3.remove((Integer) nums[u]);
+
+        }
+    }
+
+
+    @Override
+    public void output() {
+        if (ans == 15*(int)1e5 ) System.out.println(0);
+        else System.out.println(ans);
+    }
+
+}
+class AkP1051 extends Problem {
+    int x,y;
+    int[] dx = {0,-1,0,1};
+    int[] dy = {1,0,-1,0};
+    @Override
+    public void input() {
+        x = scan.nextInt();
+        y = scan.nextInt();
+        dfs(0,"");
+        output();
+    }
+    /* 伪代码
+        迭代
+    public void circle() {
+        for (int state = 0; state < state_max; state++) {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    cat[i][j] = false;
+                    dog[i][j] = false;
+                }
+            }
+            int State = state, cat_cnt = 0, dog_cnt = 0;
+            for (int j = 0; j < 9; j++) {//9位三进制数
+                int a = j / 3, b = j % 3;
+                if (State % 3 == 1) {
+                    cat[a][b] = true;
+                    cat_cnt++;
+                }
+                if (State % 3 == 2) {
+                    dog[a][b] = true;
+                    dog_cnt++;
+                }
+                State /= 3;//相当于三进制的右移一位
+            }
+            if (cat_cnt != x || dog_cnt != y || !check()) {
+                continue;
+            }
+            res++;
+        }
+    }
+
+     */
+    public void dfs(int u,String t) {
+        if (u == 9) {
+            int[][] mat = new int[3][3];
+            int[] cnt = new int[3];
+            for (int i=0;i<3;i++)
+                for (int j=0;j<3;j++) {
+                    int index = 3*i + j;
+                    mat[i][j] = t.charAt(index) - '0';
+                    cnt[mat[i][j]]++;
+                }
+
+            if (cnt[1]!= x || cnt[2] != y || !judge(mat)) {
+                return;
+            }
+
+            ans ++;
+        }
+        //不放、放猫、放狗
+        else {
+            dfs(u + 1, t + "0");
+            dfs(u + 1, t + "1");
+            dfs(u + 1, t + "2");
+
+        }
+    }
+    public boolean judge(int[][] mat) {
+        for (int i=0;i<3;i++)
+            for (int j=0;j<3;j++) {
+                if (mat[i][j] == 1 || mat[i][j] == 2)
+                    for (int k=0;k<4;k++) {
+                        int cx = i + dx[k];
+                        int cy = j + dy[k];
+                        if (cx >=0 && cx <= 2 && cy >=0 && cy <= 2 && mat[cx][cy] == mat[i][j]) {
+
+                            return false;
+                        }
+                    }
+
+            }
+
+        return true;
+    }
+
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
+}
+class AkP1049 extends Problem {
+    List<List<Integer>> list  = new ArrayList<List<Integer>>();
+    List<Integer> tmp = new ArrayList<>();
+    @Override
+    public void input() {
+        ans = 1000;
+        for (int i=0;i<7;i++) {
+            n = scan.nextInt();
+            list.add(new ArrayList<>());
+            List<Integer> list_tmp = new ArrayList<>();
+            for (int j=0;j<n;j++) {
+                list_tmp.add(scan.nextInt());
+            }
+            for (int k=0;k<=9;k++) {
+                if (!list_tmp.contains(k)) {
+                    list.get(i).add(k);
+                }
+            }
+        }
+        dfs(0,new ArrayList<>());
+        output();
+
+    }
+    public void dfs(int u,List<Integer> tmp) {
+        if (u == 10) {
+
+//            System.out.println(tmp);
+            for (List<Integer> temp:list) {
+                boolean flag = false;
+                for (Integer num:temp) {
+                    if (tmp.contains(num)) {
+                        flag = true;
+                    }
+                }
+                if (!flag) return;
+            }
+
+            ans=Math.min(ans,tmp.size());
+        }
+        else {
+            tmp.remove((Integer) u);
+            dfs(u+1,tmp);
+            tmp.add(u);
+            dfs(u+1,tmp);
+        }
+    }
+
+    @Override
+    public void output() {
+        if (ans == 1000) System.out.println(-1);
+        else System.out.println(ans);
+    }
+}
+class AkP1048 extends Problem {
+    List<Integer> list = new ArrayList<>();
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        nums = new int[n+1];
+        for (int i=1;i<=n;i++)
+            nums[i] = scan.nextInt();
+        dfs(1);
+        output();
+
+    }
+    public boolean judge(int num) {
+        for (int i=2;i<=Math.sqrt(num);i++) {
+            if (num%i == 0)
+                return false;
+        }
+        return true;
+    }
+    public void dfs(int u) {
+        if (u == n+1 ) {
+            if (list.size() == k) {
+                int sum = 0;
+                for (Integer num:list)
+                    sum += num;
+                if (judge(sum)) ans++;
+            }
+        }
+        else {
+            list.remove((Integer)nums[u]);
+//            if (list.contains(nums[u])) list.remove(nums[u]);错误的写法，remove会以为是下标
+            dfs(u+1);
+            list.add(nums[u]);
+            dfs(u+1);
+        }
+    }
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
 }
 class AkP1047 extends Problem {
     long[] nums;
@@ -431,6 +977,257 @@ class AkP1101 extends Problem {
         return fb(n-1) + fb(n-2);
     }
 }
+class Acw1597 extends Problem {
+    int[] root;
+    int[] cnt;
+
+    ArrayList<ArrayList<Integer>> list  = new ArrayList<>();
+    public int find(int x) {
+        if (root[x] == x)
+            return x;
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y ) {
+        int rx = find(x),ry = find(y);
+        if (rx != ry) {
+            cnt[ry] += cnt[rx];
+            root[rx] = ry;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+
+        scan.nextLine();
+
+        root = new int[n+1];
+        cnt  = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            root[i] = i;
+            cnt[i] = 1;
+
+        }
+        for (int i=0;i<1001;i++)
+            list.add(new ArrayList<>());
+
+        for (int i=1;i<=n;i++) {
+            String[] input = scan.nextLine().split(": ");
+            int k = Integer.parseInt(input[0]);
+            String[] num = input[1].split(" ");
+            for (int j=0;j<k;j++) {
+                int hob = Integer.parseInt(num[j]);
+                list.get(hob).add(i);
+            }
+        }
+
+        output();
+    }
+
+    @Override
+    public void output() {
+        for (int i=1;i<=1000;i++) {
+            if (list.get(i).size()<2) continue;
+            else {
+                for (int j=0;j<list.get(i).size()-1;j++) {
+                    merge(list.get(i).get(j),list.get(i).get(j+1));
+                }
+            }
+        }
+        List<Integer> cnt1 = new ArrayList<>();
+        for (int i=1;i<=n;i++) {
+            if (root[i] == i) {
+                ans++;
+                cnt1.add(cnt[i]);
+            }
+        }
+        Collections.sort(cnt1,Collections.reverseOrder());
+        System.out.println(ans);
+        for (Integer num:cnt1)
+            System.out.print(num+" ");
+    }
+}
+class Acw3719 extends Problem {
+    int[] root;
+    public int find(int x) {
+        if (root[x] == x)
+            return x;
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y ) {
+        int rx = find(x),ry = find(y);
+        if (rx != ry) {
+            root[rx] = ry;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        root = new int[n+1];
+        for (int i=1;i<=n;i++)
+            root[i] = i;
+        for (int i=0;i<m;i++) {
+            int x = scan.nextInt();
+            int y = scan.nextInt();
+            merge(x,y);
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        int cnt = 0;
+        for (int i=1;i<=n;i++) {
+            if (root[i] == i) {
+                cnt++;
+            }
+        }
+        System.out.println(cnt-1);
+    }
+}
+class Lc547 {
+    int n,ans;
+    int[] root;
+    public int findCircleNum(int[][] isConnected) {
+        n = isConnected.length;
+        root = new int[n];
+        for (int i=0;i<n;i++) {
+            root[i] = i;
+        }
+        for (int i=0;i<n;i++) {
+            for (int j=0;j<n;j++) {
+                if (isConnected[i][j]==1) {
+                    merge(i,j);
+                }
+            }
+        }
+        for (int i=0;i<n;i++) {
+            if (root[i]==i) {
+                ans++;
+            }
+        }
+        return ans;
+    }
+    public int find (int x) {
+        if (root[x] == x) {
+            return x;
+        }
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y ) {
+        int rx = find(x),ry = find(y);
+        if (rx != ry) {
+            root[rx] = ry;
+        }
+    }
+}
+class AkP1033 extends Problem {
+    public int find(int x) {
+        if (root[x] == x) {
+            return x;
+        }
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y) {
+        int rx = find(x),ry = find(y);
+        if (rx != ry) {
+            root[rx] = ry;
+        }
+    }
+    int[] root;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        root = new int[n];
+        for (int i=0;i<n;i++) {
+            root[i] = i;
+        }
+        for (int i=0;i<m;i++) {
+            int x,y;
+            x = scan.nextInt();
+            y = scan.nextInt();
+            merge(x,y);
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        for (int i=0;i<n;i++) {
+            if (root[i]==i) {
+                ans++;
+            }
+        }
+        System.out.println(ans);
+    }
+}
+class AkP1032 extends Problem {
+    int[][] matrix;
+    int[] root;
+    int[] xsd;
+    public int find(int x) {
+        if (root[x] == x)
+            return x;
+        else {
+            root[x] = find(root[x]);
+            return root[x];
+        }
+    }
+    public void merge(int x,int y) {
+        int rx = find(x),ry = find(y);
+        xsd[ry] += matrix[x][y];
+        if (rx != ry) {
+            xsd[ry] += xsd[rx];
+            root[rx] = ry;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        root = new int[n];
+        xsd = new int[n];
+        matrix = new int[n][n];
+        for (int i=0;i<n;i++)
+            root[i] = i;
+        for (int i=0;i<n;i++)
+            for (int j=0;j<n;j++) {//错误的写法 j = i+1;
+                matrix[i][j] = scan.nextInt();
+
+                if (matrix[i][j] > 0 && i<j ) {
+                    merge(i,j);
+                }
+            }
+        output();
+    }
+
+    @Override
+    public void output() {
+        List<Integer> ans = new ArrayList<>();
+        for (int i=0;i<n;i++) {
+            if (root[i] == i) {
+                ans.add(xsd[i]);
+            }
+        }
+        Collections.sort(ans,Comparator.reverseOrder());
+
+        for (int i=0;i<ans.size();i++)
+            System.out.print(ans.get(i)+" ");
+    }
+}
+
 class AkP1031 extends Problem {
     int p;
     int[] root;
