@@ -1,10 +1,8 @@
-
-
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1076().input();
+        new AkP1065().input();
     }
 }
 
@@ -17,6 +15,232 @@ abstract class Problem {
     public abstract void input();
 
     public abstract void output();
+
+
+}
+
+class AkP1065 extends Problem {
+    int[] w;
+    int[] blue;
+    List<List<Integer>> g = new ArrayList<>();
+    public int dfs(int u) {
+        int size = g.get(u).size();
+        if (size == 0) w[u] = 1;
+        else if (size == 1) {
+            w[u] = dfs(g.get(u).get(0));
+//            w[u] = w[g.get(u).get(0)];脑溢血的写法，没有继续递着搜索
+        }
+        else {
+            w[u] = 0;
+            for (Integer node : g.get(u)) {
+                if (blue[u] == 1) {
+                    w[u] += dfs(node);
+                }
+                else {
+                    w[u] ^= dfs(node);//异或，按位异则取1
+                }
+            }
+        }
+        return w[u];
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        w = new int[n+1];
+        blue = new int[n+1];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        for (int i=2;i<=n;i++) {
+            int fa = scan.nextInt();
+            g.get(fa).add(i);
+        }
+        for (int i=1;i<=n;i++)
+            blue[i]  = scan.nextInt();
+
+        ans = dfs(1);
+        output();
+
+    }
+
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
+}
+class AkP1058 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    List<Integer> res = new ArrayList<>();
+    int[] w;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        w = new int[n+1];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        for (int i=1;i<=n-1;i++) {
+            int a = scan.nextInt(),b = scan.nextInt();
+            g.get(a).add(b);
+            g.get(b).add(a);//题意并没有说输入一定是父指向子
+        }
+        output();
+    }
+    public int dfs(int u,int fa) {
+        w[u] = 1;
+        for (Integer node:g.get(u)) {
+            if (node == fa) continue;//无向中的指向父
+            w[u] += dfs(node,u);
+        }
+        return w[u];
+
+    }
+
+    @Override
+    public void output() {
+        dfs(1,-1);
+        for (int i=1;i<=n;i++)
+            System.out.print(w[i] + " ");
+    }
+}
+class AkP1078 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    Queue<Integer> que = new ArrayDeque<>();
+    List<Integer> tplist = new ArrayList<>();
+    int[] degree;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        scan.nextLine();
+        for (int i=0;i<=n;i++) {
+            g.add(new ArrayList<>());
+        }
+        degree = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            String[] str = scan.nextLine().split(" ");
+            int m = Integer.parseInt(str[0]);
+            for (int j=1;j<=m;j++) {
+                int v = Integer.parseInt(str[j]);
+                g.get(v).add(i);
+                degree[i]++;
+            }
+        }
+        tpsort();
+        output();
+    }
+    public void tpsort() {
+        for (int i=1;i<=n;i++) {
+            if (degree[i] == 0) {
+                que.offer(i);
+                //dist[i] = 1;
+            }
+        }
+        while (!que.isEmpty()) {
+            int size = que.size();
+//            System.out.println(que);
+            for (int i=1;i<=size;i++) {
+                int node = que.poll();
+                tplist.add(node);
+                for (Integer num : g.get(node)) {
+                    degree[num]--;
+                    if (degree[num] == 0) {
+                        que.offer(num);
+//                        dist[num] = dist[node] + 1;dist表示到根的距离，另一种写法：递推关系式
+                    }
+                }
+            }
+            ans++;
+
+        }
+    }
+
+    @Override
+    public void output() {
+        if (tplist.size() == n ) System.out.println(ans);
+        else System.out.println(-1);
+    }
+}
+// 解除依赖则执行，若解除依赖后不需要马上执行呢？则不用求和
+class AkP1079 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    List<Integer> list = new ArrayList<>();
+    Queue<Integer> que = new ArrayDeque<>();
+    int[] w;
+    int[] degree;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        w = new int[n+1];
+        degree = new int[n+1];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        for (int i=1;i<=n;i++)
+            w[i] = scan.nextInt();
+        for (int i=1;i<=n;i++)
+            for (int j=1;j<=n;j++) {
+                int a = scan.nextInt();
+                if (a == 1 ) {
+                    g.get(j).add(i);
+                    degree[i]++;
+                }
+
+            }
+        tpsort();
+        output();
+
+    }
+    public void tpsort() {
+        for (int i=1;i<=n;i++) {
+            if (degree[i] == 0) {
+                que.offer(i);
+            }
+        }
+        while (!que.isEmpty()) {
+            int memory = 0,sz = que.size();
+            while (sz-->0) {//同层相加,原写法是错的,会多算下层的与这层未清空的
+                int node = que.poll();
+                memory += w[node];
+                list.add(node);
+                for (Integer num : g.get(node)) {
+                    degree[num]--;
+                    if (degree[num] == 0) {
+                        que.offer(num);
+
+                    }
+                }
+            }
+            ans = Math.max(memory,ans);
+//            System.out.println(memory);
+
+        }
+        //错误的写法
+        /*while (!que.isEmpty()) {
+            int memory = 0;
+            for (Integer m:que)
+                memory+=w[m];
+            ans = Math.max(ans,memory);
+            System.out.println(memory);
+            int node = que.poll();
+            list.add(node);
+
+            for (Integer num:g.get(node)) {
+                degree[num]--;
+                if (degree[num] == 0) {
+                    que.offer(num);
+
+                }
+            }
+
+        }
+
+         */
+    }
+
+
+
+    @Override
+    public void output() {
+        if (list.size() == n) System.out.println(ans);
+        else System.out.println(-1);
+    }
 
 
 }
