@@ -1,8 +1,9 @@
+
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1065().input();
+        new AkP1064().input();
     }
 }
 
@@ -18,7 +19,61 @@ abstract class Problem {
 
 
 }
+class AkP1064 extends Problem {
+    long l,r;
+    int[] w;
+    List<List<Integer>> g = new ArrayList<>();
 
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        w = new int[n+1];
+        for (int i=0;i<=n;i++) {
+            g.add(new ArrayList<>());
+        }
+        l = scan.nextLong();
+        r = scan.nextLong();
+        scan.nextLine();
+        str = scan.nextLine();
+
+        for (int i=1;i<=n;i++) {
+            w[i] = str.charAt(i-1) - '0';
+        }
+        for (int i=2;i<=n;i++) {
+            int u = scan.nextInt();
+            int v = scan.nextInt();
+            g.get(u).add(v);
+            g.get(v).add(u);
+        }
+        for (int i=1;i<=n;i++) {
+            dfs(i,-1,new ArrayList<>());
+        }
+        output();
+    }
+    public void dfs(int u,int fa,List<Integer> path) {
+        path.add(w[u]);
+        if (path.size() >= 2) {
+            long sum = 0;
+            for (int i=0;i<path.size();i++) {
+                int size = path.size()-1;
+                if ( path.get(i) == 1 ) sum += (int) Math.pow(2,size - i);
+            }
+            System.out.println(path);
+            System.out.println(sum);
+            if (sum >= l && sum <= r) {
+                ans++;
+            }
+        }
+        for (Integer node:g.get(u)) {
+            if (node == fa) continue;
+            dfs(node,u,path);
+        }
+    }
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
+}
 class AkP1065 extends Problem {
     int[] w;
     int[] blue;
