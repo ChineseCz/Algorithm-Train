@@ -1,8 +1,10 @@
+
+
 import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1070().input();
+        new AkP1076().input();
     }
 }
 
@@ -17,6 +19,211 @@ abstract class Problem {
     public abstract void output();
 
 
+}
+class AkP1077 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    List<Integer> list = new ArrayList<>();
+    Queue<Integer> q = new ArrayDeque<>();
+    int[] degree;
+    int flag = 0;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        degree = new int[n+1];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        for (int i=0;i<m;i++) {
+            int a = scan.nextInt(),b = scan.nextInt();
+            g.get(a).add(b);
+            degree[b]++;
+        }
+        output();
+    }
+    public int tpsort() {
+        int res = 1;
+        for (int i=1;i<=n;i++)
+            if (degree[i] == 0)
+                q.offer(i);
+        while(!q.isEmpty()) {
+            int node = q.poll();
+            list.add(node);
+            for (Integer num:g.get(node)) {
+                degree[num]--;
+                if (degree[num] == 0) {
+                    q.offer(num);
+                }
+            }
+            if (g.get(node).size()>1) res = 2;
+        }
+        if (list.size() < n) return 0;
+        else return res;
+
+    }
+
+    @Override
+    public void output() {
+        ans = tpsort();
+        if (ans == 0) System.out.println("No Results");
+        else if (ans == 1) System.out.println("Only One Sorted Results");
+        else System.out.println("Many Sorted Results");
+    }
+}
+/* 优先队列
+    小根堆：将编号小的点先进行出边删除
+    大根堆：将编号大的…
+ */
+class Acw3704 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    List<Integer> list = new ArrayList<>();
+    PriorityQueue<Integer> que = new PriorityQueue<>();
+    int[] degree;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        degree = new int[n+1];
+        m = scan.nextInt();
+        for (int i=1;i<=m;i++) {
+            int u = scan.nextInt();
+            int v = scan.nextInt();
+            g.get(u).add(v);
+            degree[v]++;
+        }
+        tpsort();
+        output();
+
+    }
+    public void tpsort() {
+        for (int i=1;i<=n;i++) {
+            if (degree[i] == 0) {
+                que.add(i);
+            }
+        }
+        while(!que.isEmpty()) {
+            Integer node = que.poll();
+            list.add(node);
+            for (Integer num:g.get(node)) {
+                degree[num]--;
+                if (degree[num] == 0) {
+                    que.add(num);
+                }
+            }
+
+        }
+    }
+
+    @Override
+    public void output() {
+        for (Integer num:list)
+            System.out.print(num+" ");
+    }
+}
+class AkP1076 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    int[] inDegree;
+    Queue<Integer> q = new ArrayDeque<>();
+    List<Integer> tplist = new ArrayList<>();
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        inDegree = new int[n+1];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+
+
+        for (int i=0;i<m;i++) {
+            int u = scan.nextInt(),v = scan.nextInt();
+            g.get(u).add(v);
+            inDegree[v]++;
+        }
+        tpsort();
+        output();
+    }
+    public void tpsort() {
+        for (int i=1;i<=n;i++) {
+            if (inDegree[i] == 0) {
+                tplist.add(i);
+                q.offer(i);
+            }
+        }
+        while (!q.isEmpty()) {
+            int node = q.poll();
+//            tplist.add(node); 在这里入拓扑表即可
+            for (Integer num:g.get(node)) {
+                inDegree[num]--;
+                if (inDegree[num] == 0) {
+                    tplist.add(num);
+                    q.offer(num);
+                }
+            }
+//            g.remove(node);入度减一已相当于删除边，这里多余，会造成数组变小而越界
+        }
+
+    }
+    @Override
+    public void output() {
+        if (tplist.size() == n) System.out.println("YES");
+        else System.out.println(tplist.size());
+    }
+}
+class AkP1055 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    public void dfs(int u,int fa) {
+        //do
+        for (Integer num:g.get(u)) {
+            if (num == fa) continue;
+            dfs(num,u);//表示u已经访问过
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        for (int i=0;i<=n;i++) {
+            g.add(new ArrayList<>());
+        }
+        for (int i=1;i<n;i++) {
+            int u = scan.nextInt(),v = scan.nextInt();
+            g.get(u).add(v);
+            g.get(v).add(u);
+        }
+        for (List<Integer> list:g) {
+            int cnt = 0;
+            for (Integer num:list) {
+//                dfs(num,-1);
+                cnt++;
+            }
+            if (cnt == 2)
+                ans++;
+        }
+        output();
+    }
+
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
+}
+class AkP1054 extends Problem {
+
+    @Override
+    public void input() {
+        T = scan.nextInt();
+        while(T-->0) {
+            n = scan.nextInt();
+            m = scan.nextInt();
+            long max = (long) n *(n-1)>>1;
+            if (m>= n-1 && m <= max) System.out.println("YES");
+            else System.out.println("NO");
+        }
+    }
+
+    @Override
+    public void output() {
+
+    }
 }
 class AkP1071 extends Problem {
     int[] dx = {-1,0,1,0};
