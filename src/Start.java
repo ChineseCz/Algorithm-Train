@@ -1,43 +1,74 @@
-/* 授权成功
-您的免费API Key为: sk-CQAw9uxMjdAF2jD5nB5f1kReVnjigqKldWHCdyftMseY9o0A
-请妥善保管，不要泄露给他人，如泄漏造成滥用可能会导致Key被封禁
- */
-
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Start {
+    static List<Integer>[] tree;
+    static char[] colors;
+    static int n;
+    static int[] redCount, greenCount, blueCount;
+    static int totalRed, totalGreen, totalBlue;
+    static int result = 0;
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        String s = scanner.nextLine();
-        int n = s.length();
-        int res = 0;
-        // 枚举1~2^n-1的所有状态
-        for (int state = 1; state < (1 << n); state++) {
-            StringBuilder t = new StringBuilder();
-            boolean flag = true;  // 来判断当前字符串是否合法，也就是不能有两个连续的0
-            // 判断是否有两个连续的0
-            for (int i = 0; i < n - 1; i++) {
-                boolean f1 = (state >> i & 1) == 1;
-                boolean f2 = (state >> (i + 1) & 1) == 1;
-                if (!f1 && !f2) {  // 有两个连续的0
-                    flag = false;
-                    break;
-                }
-            }
-            if (!flag) continue;  // 不合法，直接枚举下一个状态
-            // 判断第i个字符是否被选择
-            for (int i = 0; i < n; i++) {
-                // 如果第i个字符被选择
-                if ((state >> i & 1) == 1) {
-                    t.append(s.charAt(i));
-                }
-            }
-            // 如果子串包含"bengtie"，则计数器加一
-            if (t.toString().contains("bengtie")) {
-                res++;
+        n = scanner.nextInt();
+        tree = new ArrayList[n + 1];
+        for (int i = 1; i <= n; i++) {
+            tree[i] = new ArrayList<>();
+        }
+
+        for (int i = 2; i <= n; i++) {
+            int parent = scanner.nextInt();
+            tree[parent].add(i);
+            tree[i].add(parent);
+        }
+
+        colors = scanner.next().toCharArray();
+
+        redCount = new int[n + 1];
+        greenCount = new int[n + 1];
+        blueCount = new int[n + 1];
+
+        // Count total colors
+        for (char color : colors) {
+            if (color == 'R') totalRed++;
+            else if (color == 'G') totalGreen++;
+            else if (color == 'B') totalBlue++;
+        }
+
+        // Start DFS from the root (node 1)
+        dfs(1, -1);
+
+        System.out.println(result);
+    }
+
+    private static void dfs(int node, int parent) {
+        // Initialize the current node's color count
+        if (colors[node - 1] == 'R') redCount[node]++;
+        else if (colors[node - 1] == 'G') greenCount[node]++;
+        else if (colors[node - 1] == 'B') blueCount[node]++;
+
+        // Traverse all children
+        for (int child : tree[node]) {
+            if (child == parent) continue;
+            dfs(child, node);
+            // Accumulate the color count from the child to the current node
+            redCount[node] += redCount[child];
+            greenCount[node] += greenCount[child];
+            blueCount[node] += blueCount[child];
+        }
+
+        // Check if cutting the edge between node and parent makes both subtrees colorful
+        if (parent != -1) {
+            int parentRed = totalRed - redCount[node];
+            int parentGreen = totalGreen - greenCount[node];
+            int parentBlue = totalBlue - blueCount[node];
+
+            if (redCount[node] > 0 && greenCount[node] > 0 && blueCount[node] > 0 &&
+                    parentRed > 0 && parentGreen > 0 && parentBlue > 0) {
+                result++;
             }
         }
-        System.out.println(res);
     }
 }

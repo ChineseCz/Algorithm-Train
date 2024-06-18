@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1064().input();
+        new AkP1061().input();
     }
 }
 
@@ -18,6 +18,106 @@ abstract class Problem {
     public abstract void output();
 
 
+}
+
+class AkP1061 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    int[] d;
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        d = new int[n+1];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        for (int i=2;i<=n;i++) {
+            int u,v;
+            u = scan.nextInt();
+            v = scan.nextInt();
+            g.get(u).add(v);
+            g.get(v).add(u);
+        }
+        dfs(1,-1,-1);
+        output();
+    }
+    //已经有实例变量表示深度状态了，其实不需要形参int depth
+    public void dfs(int u,int fa,int depth) {
+        d[u] = depth + 1;
+        int size = g.get(u).size();
+
+        if (d[u] <= k) {
+            ans++;
+            if (size == 1 && fa != -1) ans += k - d[u];//叶子节点,注意判断不是根节点，根节点可能只有1个出度，一旦判断为叶子就多算了
+        }
+
+        for (Integer node:g.get(u)) {
+            if (node == fa) continue;
+            dfs(node,u,d[u]);
+        }
+    }
+
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
+}
+//树形DFS题，裁剪一条边后，两个节点各自形成子树，此题不是路径类，不应该枚举n^2.
+class AkP1066 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    int[] w;
+    int[][] f;
+    int[] total = new int[3];
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        w = new int[n+1];
+        f = new int[n+1][3];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        for (int i=2;i<=n;i++) {
+            int u = scan.nextInt();
+            g.get(u).add(i);
+            g.get(i).add(u);
+        }
+        scan.nextLine();
+        str = scan.nextLine();
+        for (int i=1;i<=n;i++) {
+            if(str.charAt(i-1) == 'R') w[i] = 0;
+            else if (str.charAt(i-1) == 'G') w[i] = 1;
+            else w[i] = 2;
+        }
+
+        for (int i=1;i<=n;i++) {
+            if (w[i] == 0 ) total[0]++;
+            else if (w[i] == 1 ) total[1]++;
+            else total[2]++;
+        }
+        dfs(1,-1);//从根开始搜，根其实从哪开始都行
+        output();
+
+
+    }
+    public void add(int u) {
+        if (w[u] == 0) f[u][0]++;
+        else if (w[u] == 1) f[u][1]++;
+        else f[u][2]++;
+    }
+    public void dfs(int u,int fa) {
+        add(u);
+        for (Integer node:g.get(u)) {
+            if (node == fa) continue;
+            dfs(node,u);
+            //加上子节点的
+            for (int i=0;i<3;i++)
+                f[u][i] += f[node][i];
+        }
+        if (f[u][0]>=1 && f[u][1]>=1 && f[u][2] >=1 && total[0] > f[u][0] && total[1] > f[u][1] && total[2] > f[u][2])
+            ans++;
+    }
+    @Override
+    public void output() {
+        System.out.println(ans);
+    }
 }
 class AkP1064 extends Problem {
     long l,r;
@@ -46,27 +146,50 @@ class AkP1064 extends Problem {
             g.get(v).add(u);
         }
         for (int i=1;i<=n;i++) {
-            dfs(i,-1,new ArrayList<>());
+            dfs(i,-1,0);
         }
         output();
     }
+    public void dfs(int u,int fa,long sum) {
+        sum = (sum<<1) + w[u];//这不就好了！
+
+        if (sum > r) return;
+        if (fa!=-1 && sum>=l && sum <=r) {
+            ans++;
+        }
+
+
+        for (Integer node:g.get(u)) {
+            if (node == fa) continue;
+            dfs(node,u,sum);
+        }
+    }
     public void dfs(int u,int fa,List<Integer> path) {
         path.add(w[u]);
+
         if (path.size() >= 2) {
             long sum = 0;
+            //每条路径求和，共n*(n-1)条，则复杂度n*(n-1)*(路径的点数)，最差时路径有n个点
+            // 若是链表，遍历到最后一个节点需要n-1次，此时还需要n次操作；复杂度又上升到n^3,直接类比前缀和，用移位的思想
             for (int i=0;i<path.size();i++) {
                 int size = path.size()-1;
                 if ( path.get(i) == 1 ) sum += (int) Math.pow(2,size - i);
             }
-            System.out.println(path);
-            System.out.println(sum);
+
+
             if (sum >= l && sum <= r) {
+//                System.out.println(path);
+//                System.out.println(sum);
                 ans++;
             }
+            else if (sum > r) return;
         }
         for (Integer node:g.get(u)) {
             if (node == fa) continue;
-            dfs(node,u,path);
+//            System.out.print(node + path.toString()+"\n");
+            dfs(node,u,path);//传的是引用变量，相当于指针，所以需要回溯
+            path.remove((Integer) w[node]);//回溯,必须包装！！！，否则会移除下标对应元素
+//            System.out.print("back" + path.toString() + "\n");
         }
     }
     @Override
