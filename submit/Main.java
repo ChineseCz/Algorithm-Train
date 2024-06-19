@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
-        new AkP1061().input();
+        new AkP1063().input();
     }
 }
 
@@ -19,7 +19,305 @@ abstract class Problem {
 
 
 }
+class AkP1063 extends Problem {
+    int[] a;
+    int[][] f;
+    int[] cnt2,cnt5;
+    int[] w;
 
+
+    List<List<Integer>> g = new ArrayList<>();
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        a = new int[n+1];
+        cnt2 = new int[n+1];
+        cnt5 = new int[n+1];
+        w = new int[n+1];
+        f = new int[n+1][2];
+
+        for (int i=1;i<=n;i++) {
+            g.add(new ArrayList<>());
+            a[i] = scan.nextInt();
+            while (a[i]%2 == 0) {
+                a[i]/=2;
+                cnt2[i]++;
+            }
+            while (a[i]%5 == 0) {
+                a[i]/=5;
+                cnt5[i]++;
+            }
+        }
+        g.add(new ArrayList<>());
+        for (int i=2;i<=n;i++) {
+            int u,v;
+            u = scan.nextInt();
+            v = scan.nextInt();
+            g.get(u).add(v);
+            g.get(v).add(u);
+        }
+
+        dfs(1,-1);
+        output();
+
+    }
+
+    public int zeroCnt(int u) {
+        return Math.min(f[u][0],f[u][1]);
+    }
+    public void dfs(int u,int fa) {
+        f[u][0] += cnt2[u];
+        f[u][1] += cnt5[u];
+        if (g.get(u).size() == 1 && u!= 1) {//注意排除根节点
+            return;
+        }
+        for (Integer node:g.get(u)) {
+            if (node == fa) continue;
+            dfs(node,u);
+            f[u][0] += f[node][0];
+            f[u][1] += f[node][1];
+        }
+
+    }
+    @Override
+    public void output() {
+        for (int i=1;i<=n;i++) {
+            System.out.print(zeroCnt(i) + " ");
+        }
+    }
+}
+/*写的非常复杂，其实我也想到对区间二分的思路，那其实就不需要建图了，枚举所有叶子节点即可
+我的思路：
+1.这里是先前序搜索各个节点的平均值
+2.再一次搜索，计算各个节点的最终权值
+3.BFS得到层序遍历的结果，对应树状数组
+本题关键：
+2*i是左儿子，2*i+1是右儿子
+ */
+class AkP1067 extends Problem {
+    int[] a;
+    int[] max,min;
+    int[] averge,weight;
+    int depth;
+    List<List<Integer>> g = new ArrayList<>();
+    List<Integer> res = new ArrayList<>();
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        a = new int[n];
+        depth = (int) (Math.log(n)/Math.log(2));
+        int count = (int) (Math.pow(2,depth+1) - 1);
+        max = new int[count + 1];
+        min = new int[count + 1];
+        weight = new int[count + 1];
+        averge = new int[count + 1];
+        Arrays.fill(min,Integer.MAX_VALUE);
+        for (int i=0;i<=count;i++) {
+            g.add(new ArrayList<>());
+        }
+        for (int i=0;i<n;i++)
+            a[i] = scan.nextInt();
+        int str = (int) (Math.pow(2,depth));
+        for (int i = str;i < str + n;i++) {
+            max[i] = a[i-str];
+            min[i] = a[i-str];
+            averge[i] = max[i];
+        }
+
+        dfs(1,-1);
+        dfs_val(1,-1,0);
+        bfs();
+        output();
+    }
+    public void dfs(int u,int depth) {
+        depth++;
+        if (depth == this.depth) {
+            return;
+        }
+        g.get(u).add(u*2);
+        g.get(u).add(u*2+1);
+        for(Integer node:g.get(u)) {
+            dfs(node,depth);
+            max[u] = Math.max(max[node],max[u]);
+            min[u] = Math.min(min[node],min[u]);
+        }
+        averge[u] = (int) (max[u]+min[u])/2;
+    }
+    public void dfs_val(int u,int depth,int fa) {
+        depth++;
+        if (depth == this.depth+1)
+            return;
+
+        weight[u] = averge[u] - fa;
+//        res.add(weight[u]);
+        fa += weight[u];
+
+        for (Integer node:g.get(u)) {
+            dfs_val(node,depth,fa);
+        }
+    }
+    public void bfs() {
+        Queue<Integer> que = new ArrayDeque<>();
+        que.offer(1);
+        while (!que.isEmpty()) {
+            Integer node = que.poll();
+            res.add(weight[node]);
+            for (Integer num:g.get(node) ) {
+                que.offer(num);
+            }
+        }
+    }
+
+    @Override
+    public void output() {
+        for (int i=0;i<res.size();i++)
+            System.out.print(res.get(i)+" ");
+    }
+    class FunBySelect {
+        //二分区间写法
+    }
+}
+class AkP1060 extends Problem {
+    List<List<Node>> g = new ArrayList<>();
+    Integer[] node;
+    int[] prior;
+    int[] degree;
+    class Node {
+        int next;
+        int weight;
+        public Node(int next,int weight) {
+            this.next = next;
+            this.weight = weight;
+        }
+    }
+    class myComparator implements Comparator<Integer> {
+
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            if (prior[o1] != prior[o2]) return prior[o2] - prior[o1];
+            else return o1-o2;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        node = new Integer[n+1];
+        prior = new int[n+1];
+        degree = new int[n+1];
+        for (int i=0;i<=n;i++) {
+            g.add(new ArrayList<>());
+            node[i] = i;
+        }
+        for (int i=0;i<m;i++) {
+            int pro,con,latency;
+            pro = scan.nextInt();
+            con = scan.nextInt();
+            latency = scan.nextInt();
+            g.get(pro).add(new Node(con,latency));
+            degree[con]++;
+        }
+        for (int i=1;i<=n;i++)
+            if (degree[i] == 0)
+                dfs(i);
+
+//        System.out.println(Arrays.toString(prior));
+        Arrays.sort(node,new myComparator());
+//        Arrays.sort(node,1,n,new myComparator());1到n排序后是从0开始放的
+        for (int i=0;i<=n;i++)
+            if (node[i]!=0 ) System.out.print(node[i]+" ");
+    }
+    public void dfs(int u) {
+        for (Node node:g.get(u)) {
+            dfs(node.next);
+            prior[u] = Math.max(prior[u],prior[node.next] + node.weight);
+        }
+    }
+    @Override
+    public void output() {
+
+    }
+}
+//注释的写法超时
+//自定义排序写法
+class AkP1059 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    int[] cnt;
+    int[] degree;
+    Integer[] node;
+
+    List<Integer> res = new ArrayList<>();
+    class myComparator implements Comparator<Integer> {
+
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            if (cnt[o1] != cnt[o2]) return cnt[o2] - cnt[o1];
+            else return o1-o2;
+        }
+    }
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        cnt = new int[n];
+        degree = new int[n];
+        node = new Integer[n];
+        for (int i=0;i<n;i++) {
+            g.add(new ArrayList<>());
+        }
+        for (int i=0;i<n;i++) {
+            int u = scan.nextInt();
+            if (u!= -1) {
+                g.get(u).add(i);
+                degree[i]++;
+            }
+        }
+        for (int i=0;i<n;i++) {
+            node[i] = i;
+            if (degree[i] == 0) {
+                dfs(i);
+            }
+        }
+        Arrays.sort(node,new myComparator());//将节点编号按自定义比较器在数组中排序
+
+        for(int i = 0; i < n; i++) {//foreach比这个慢，会超时
+            System.out.print(node[i] + " ");
+        }
+//        for (int i=0;i<n;i++) {
+//            if (!map.containsKey(cnt[i]))
+//                map.put(cnt[i],new ArrayList<>());
+//            map.get(cnt[i]).add(i);
+//        }
+//        for (Map.Entry<Integer, List<Integer>> entry : map.entrySet()) {
+//            Collections.sort(entry.getValue());
+//        }
+//        Arrays.sort(cnt);
+//        output();
+
+
+    }
+    public void dfs(int u) {
+        cnt[u] = 1;
+        for (Integer node:g.get(u)) {
+            dfs(node);
+            cnt[u] += cnt[node];
+        }
+    }
+    @Override
+    public void output() {
+//        for (int i=n-1;i>=0;i--) {
+//            if (map.containsKey(cnt[i]))
+//                for (Integer num : map.get(cnt[i])) {
+//                    if (!res.contains(num)) {
+//                        res.add(num);
+//                    }
+//                }
+//        }
+//        for (Integer num : res) {
+//            System.out.print(num + " ");
+//        }
+    }
+}
 class AkP1061 extends Problem {
     List<List<Integer>> g = new ArrayList<>();
     int[] d;
@@ -2602,6 +2900,46 @@ class Acw3771 extends Problem {
         }
         System.out.println(ans);
 
+    }
+}
+class AkP1004 {
+    int[] nums,nums2,nums5;
+    long ans =0;
+    int cnt2=0,cnt5=0;
+
+    public long res(int n,int k,Scanner scan) {
+        nums = new int[n];
+        nums2 = new int[n];
+        nums5 = new int[n];
+
+        for (int i=0;i<n;i++) {
+            nums[i] = scan.nextInt();
+            while (nums[i]%2 ==0) {
+                nums[i]/=2;
+                nums2[i]++;
+                cnt2++;
+            }
+            while (nums[i]%5 == 0) {
+                nums[i]/=5;
+                nums5[i]++;
+                cnt5++;
+            }
+        }
+
+        for (int l=0,r=0;r<nums.length;r++) {
+            cnt2 -= nums2[r];
+            cnt5 -= nums5[r];
+            while ( l<=r && !checkZero(k)) {
+                cnt2 += nums2[l];
+                cnt5 += nums5[l];
+                l++;
+            }
+            ans += r-l+1;
+        }
+        return ans;
+    }
+    public boolean checkZero(int k) {
+        return Math.min(cnt2,cnt5) >= k;
     }
 }
 /* 本题用Set结构更好 */
