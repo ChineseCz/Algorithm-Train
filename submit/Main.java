@@ -1,25 +1,1413 @@
 
+import java.io.*;
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
-        new AkP1061().input();
+    public static void main(String[] args) throws IOException {
+        new AkP1102().input();
     }
 }
 
 abstract class Problem {
     Scanner scan = new Scanner(System.in);
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
     int n,m,q,k,T;
     int[] nums;
     long ans;
     String str;
-    public abstract void input();
+    public abstract void input() throws IOException;
 
-    public abstract void output();
+    public abstract void output() throws IOException;
 
-
+    class Node {
+        int x;
+        int y;
+        int state;
+        public Node(int x,int y) {
+            this.x = x;
+            this.y = y;
+        }
+        public Node(int x,int y,int state) {
+            this.x = x;
+            this.y = y;
+            this.state = state;
+        }
+    }
 }
+class AkP1102 extends Problem {
+    long f1 = 1;
+    long f2 = 1;
+    long f3;
+    int mod = (int)1e9 +7;
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        if (n == 1) System.out.println(1);
+        else if (n == 2) System.out.println(1);
+        else {
+            for (int i = 3; i <= n; i++) {
+                f3 = f1 + f2;
+                f3 %= mod;
+                f1 = f2;
+                f2 = f3;
+            }
+            System.out.println(f3);
+        }
+    }
 
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+class AkP1157 extends Problem {
+    class Child {
+        int index;
+        long gift;
+        public Child(int index,long gift) {
+            this.index = index;
+            this.gift = gift;
+        }
+    }
+    class myComparator implements Comparator<Child> {
+
+        @Override
+        public int compare(Child o1, Child o2) {
+            if (Math.ceil((double) o1.gift /m) != Math.ceil((double) o2.gift /m)) return (int) (o1.gift - o2.gift);
+            else return o1.index - o2.index;
+        }
+    }
+    PriorityQueue<Child> que = new PriorityQueue<>(new myComparator());
+    @Override
+    public void input() throws IOException {
+
+        n = Integer.parseInt(reader.readLine());
+        m = Integer.parseInt(reader.readLine());
+        String[] str = reader.readLine().split(" ");
+        for (int i=0;i<n;i++) {
+            long q = Long.parseLong(str[i]);
+            que.add(new Child(i,q));
+        }
+        for (int i=0;i<n;i++) {
+            writer.write(que.poll().index + 1 + " ");
+        }
+        writer.flush();
+    }
+
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+class AkP1153 extends Problem {
+    long[] sco;
+    long[] dif;
+    PriorityQueue<Long> que = new PriorityQueue<>();
+    PriorityQueue<Long> queMax = new PriorityQueue<>(Comparator.reverseOrder());
+    long max;
+    @Override
+    public void input() throws IOException {
+        String[] nm = reader.readLine().split(" ");
+        n = Integer.parseInt(nm[0]);
+        m = Integer.parseInt(nm[1]);
+        String[] str = reader.readLine().split(" ");
+        for (int i=0;i<n;i++) {
+            long sco = Long.parseLong(str[i]);
+            que.add(sco);
+            max = Math.max(sco,max);
+//            queMax.add(sco);
+        }
+        String[] str1 = reader.readLine().split(" ");
+        for (int i=0;i<m;i++) {
+            long dif = Long.parseLong(str1[i]);
+            long sco = que.remove();
+//            queMax.remove((Long) sco);
+            sco += dif;
+            que.add(sco);
+            max = Math.max(sco,max);
+//            queMax.add(sco);
+            writer.write(max+"\n");
+        }
+        writer.flush();
+    }
+
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+//连通块 + 多源BFS
+class lc934 {
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    class Node {
+        int x,y;
+        public Node(int x,int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    int n,num;
+    int[][] dist;
+    boolean[][] visit;
+    int[][] grid;
+    Queue<Node> que = new LinkedList<>();
+    int ans = Integer.MAX_VALUE;
+    public void dfs(int x,int y) {
+        visit[x][y] = true;
+        que.offer(new Node(x,y));
+        dist[x][y] = 0;
+        for (int i=0;i<4;i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (nx < 0 || nx == n || ny < 0 || ny == n || visit[nx][ny] || grid[nx][ny] == 0)
+                continue;
+            dfs(nx,ny);
+        }
+    }
+    //其实找到1就可以返回了，因为BFS每层递增都是最近的情况
+    public void bfs() {
+        while (!que.isEmpty()) {
+            Node node = que.poll();
+            int x = node.x;
+            int y = node.y;
+            for (int i=0;i<4;i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+                if (nx < 0 || nx == n || ny < 0 || ny == n )
+                    continue;
+                if (dist[nx][ny] > dist[x][y] + 1) {
+                    dist[nx][ny] = dist[x][y] + 1;
+                    que.offer(new Node(nx,ny));
+                }
+            }
+        }
+    }
+    public int shortestBridge(int[][] grid) {
+        n = grid.length;
+        dist = new int[n][n];
+        visit = new boolean[n][n];
+        this.grid = grid;
+        for (int i=0;i<n;i++)
+            Arrays.fill(dist[i],Integer.MAX_VALUE);
+        for (int i=0;i<n;i++) {
+            for (int j=0;j<n;j++) {
+                if (grid[i][j] == 1 && !visit[i][j]) {
+                    dfs(i,j);
+                    num++;
+                    if (num == 1) break;
+                }
+            }
+            if (num == 1) break;
+        }
+        bfs();
+        System.out.println(Arrays.deepToString(visit));
+        System.out.println(Arrays.deepToString(dist));
+        for (int i=0;i<n;i++) {
+            for (int j=0;j<n;j++) {
+                if (grid[i][j] == 1 && !visit[i][j]) {
+                    ans = Math.min(dist[i][j],ans);
+                }
+            }
+        }
+        return ans - 1;
+    }
+}
+class AkP1075 extends Problem {
+    int[][] g;
+    Queue<Node> que = new LinkedList<>();
+    int[][] dist;
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    @Override
+    public void input() throws IOException {
+        String[] nk = reader.readLine().split(" ");
+        n = Integer.parseInt(nk[0]);
+        m = Integer.parseInt(nk[1]);
+        g = new int[n][m];
+        dist = new int[n][m];
+        for (int i=0;i<n;i++) {
+            Arrays.fill(dist[i],Integer.MAX_VALUE);
+            String[] str = reader.readLine().split(" ");
+            for (int j=0;j<m;j++) {
+                g[i][j] = Integer.parseInt(str[j]);
+                if (g[i][j] == 1 && j == 0) {
+                    que.offer(new Node(i,j));
+                    dist[i][j] = 0;
+                }
+            }
+        }
+        bfs();
+        output();
+    }
+    public void bfs() {
+        while(!que.isEmpty()) {
+            Node node = que.poll();
+            int x = node.x;
+            int y = node.y;
+            for (int i=0;i<4;i++) {
+                int nx = x+dx[i];
+                int ny = y+dy[i];
+                if (nx <0 || ny<0||nx>=n || ny>=m || g[nx][ny] == 0)
+                    continue;
+                if (dist[nx][ny] > dist[x][y] + 1) {
+                    dist[nx][ny] = dist[x][y] + 1;
+                    que.add(new Node(nx, ny));
+                }
+            }
+        }
+    }
+    @Override
+    public void output() throws IOException {
+        ans = Integer.MAX_VALUE;
+        for (int i=0;i<n;i++) {
+            ans = Math.min(ans,dist[i][m-1]);
+        }
+        if (ans == Integer.MAX_VALUE) System.out.println(-1);
+        else System.out.println(ans);
+    }
+}
+class Acw3083 extends Problem {
+    int[][] g;
+    Queue<Node> que = new LinkedList<>();
+    int[][] dist;
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    @Override
+    public void input() throws IOException {
+        String[] nk = reader.readLine().split(" ");
+        n = Integer.parseInt(nk[0]);
+        m = Integer.parseInt(nk[1]);
+        g = new int[n][m];
+        dist = new int[n][m];
+        for (int i=0;i<n;i++) {
+            Arrays.fill(dist[i],Integer.MAX_VALUE);
+            String str = reader.readLine();
+            for (int j=0;j<m;j++) {
+                g[i][j] = str.charAt(j) - '0';
+                if (g[i][j] == 1) {
+                    que.offer(new Node(i,j));
+                    dist[i][j] = 0;
+                }
+            }
+        }
+        System.out.println(Arrays.deepToString(dist));
+        bfs();
+        output();
+
+    }
+    public void bfs() {
+        while(!que.isEmpty()) {
+            Node node = que.poll();
+            int x = node.x;
+            int y = node.y;
+            for (int i=0;i<4;i++) {
+                int nx = x+dx[i];
+                int ny = y+dy[i];
+                if (nx <0 || ny<0||nx>=n || ny>=m )
+                    continue;
+                if (dist[nx][ny] > dist[x][y] + 1) {
+                    dist[nx][ny] = dist[x][y] + 1;
+                    que.add(new Node(nx, ny));
+                }
+            }
+        }
+    }
+    @Override
+    public void output() throws IOException {
+        for (int i=0;i<n;i++) {
+            for (int j = 0; j < m; j++) {
+                writer.write(dist[i][j] + " ");
+
+            }
+            writer.write("\n");
+        }
+        writer.flush();
+    }
+}
+class AkP1074 extends Problem {
+    String[][] g;
+    int[][] trick;
+    int strx,stry,endx,endy;
+    int[] dx = {-1,0,1,0,0};
+    int[] dy = {0,-1,0,1,0};
+    int[][][] dist;
+    int state;
+    Queue<Node> que = new LinkedList<>();
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        k = scan.nextInt();
+        g = new String[n][n];
+        trick = new int[n][n];
+        dist = new int[3][n][n];
+        for (int i=0;i<3;i++)
+            for (int j=0;j<n;j++)
+                Arrays.fill(dist[i][j],Integer.MAX_VALUE);
+        for (int i=0;i<k;i++) {
+            int x,y;
+            x = scan.nextInt();
+            y = scan.nextInt();
+            trick[x][y] = 1;
+        }
+        endx = scan.nextInt();
+        endy = scan.nextInt();
+        strx = scan.nextInt();
+        stry = scan.nextInt();
+        scan.nextLine();
+        for (int i=0;i<n;i++) {
+            String[] str = scan.nextLine().split(" ");
+            for (int j = 0; j < n; j++) {
+                g[i][j] = str[j];
+            }
+        }
+        que.offer(new Node(strx,stry,0));
+        dist[0][strx][stry]= 0;
+        bfs();
+//        for (int i=0;i<3;i++) {
+//            for (int j = 0; j < n; j++) {
+//                for (int k = 0; k < n; k++) {
+//                    if (dist[i][j][k] == Integer.MAX_VALUE) dist[i][j][k] = -1;
+//                    System.out.print(dist[i][j][k] + " ");
+//                }
+//                System.out.println();
+//            }
+//            System.out.println();
+//        }
+
+        output();
+    }
+    public void bfs() {
+
+        while(!que.isEmpty()) {
+            Node node = que.poll();
+            int x = node.x;
+            int y = node.y;
+            int s = node.state;
+            for (int i=0;i<5;i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+                int ns = (s + 1)%3;
+                if (nx <0 || nx >= n || ny < 0 || ny >= n
+                        || trick[nx][ny] == 1
+                        || g[nx][ny].charAt(ns) == '1'//注意这里别弄错，char1和int1
+                        || dist[ns][nx][ny] != Integer.MAX_VALUE)
+                    continue;
+
+                que.offer(new Node(nx,ny,ns));
+                dist[ns][nx][ny] = dist[s][x][y] +1;
+
+
+            }
+
+        }
+    }
+
+    @Override
+    public void output() throws IOException {
+        ans = Integer.MAX_VALUE;
+        for (int i=0;i<3;i++) {
+            ans = Math.min(ans,dist[i][endx][endy]);
+        }
+        if (ans == Integer.MAX_VALUE) System.out.println(-1);
+        else System.out.println(ans);
+    }
+}
+//如何输出路径是本题难点
+//可以通过一个数组来记录当前节点的父节点信息 然后从终点逆向推到起点
+// （这一过程其实很像动态规划）
+// 再对数组进行reverse即可顺序输出从起点到终点的路径
+class AkP1053 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    int[] w;
+    int[] dist;
+    int[] degree;
+    int[] fa;
+    int goal;
+    List<Integer> res = new ArrayList<>();
+    Queue<Integer> que = new LinkedList<>();
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        w = new int[n+1];//这里开n不够。被堵路口有n，数据不合理
+        dist = new int[n];
+        degree = new int[n];
+        fa = new int[n];
+        Arrays.fill(dist,Integer.MAX_VALUE);
+        for (int i=1;i<=m;i++){
+            int u,v;
+            u = scan.nextInt();
+            v = scan.nextInt();
+            g.get(u).add(v);
+            g.get(v).add(u);
+            degree[u]++;
+            degree[v]++;
+        }
+        for (int i=0;i<n;i++) {
+            Collections.sort(g.get(i));
+        }
+        k = scan.nextInt();
+        for (int i=0;i<k;i++) {
+            int a = scan.nextInt();
+            w[a] = 1;
+        }
+        que.offer(0);
+        dist[0] = 0;
+        goal = bfs();
+        output();
+    }
+    public int bfs() {
+        if (w[0] == 1) return -1;
+        while(!que.isEmpty()) {
+            int node = que.poll();
+            for (int next:g.get(node)) {
+                if (w[next] == 0 && dist[next] == Integer.MAX_VALUE) {
+                    que.offer(next);
+                    dist[next] = dist[node] + 1;
+                    fa[next] = node;
+                    if (degree[next] == 1 ) {
+                        return next;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+    @Override
+    public void output() throws IOException {
+        if (goal == -1) {
+            System.out.println("NULL");
+            return;
+        }
+        while(goal != 0) {
+            res.add(goal);
+            goal = fa[goal];
+        }
+        System.out.print("0");
+        for (int i=res.size()-1;i>=0;i--) {
+            System.out.print("->"+res.get(i));
+        }
+
+    }
+}
+//dist为什么要开long，n不是最大10^5吗
+class AkP1052 extends Problem {
+    long[] dist;
+    long k;
+    int[] w;
+    List<List<Integer>> g = new ArrayList<>();
+    Queue<Integer> que = new LinkedList<>();
+    List<Integer> res = new ArrayList<>();
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        k = scan.nextLong();
+        scan.nextLine();
+        String[] str = scan.nextLine().split(" ");
+        dist = new long[n + 1];
+        w = new int[n + 1];
+        for (int i=0;i<=n;i++)
+            g.add(new ArrayList<>());
+        for (int i=1;i<=n;i++) {
+//            w[i] = str[i-1].charAt(0);//妈的，你这个只取第一位啊！今天脑子进水了，太幽默了。。
+            int v = Integer.parseInt(str[i-1]);
+            dist[i] = Long.MAX_VALUE;//为什么必须LONG
+            g.get(i).add(v);
+        }
+//        System.out.println(Arrays.toString(w));
+        //以下没问题
+        que.offer(1);
+        dist[1] = 0;
+        bfs();
+        output();
+    }
+    public void bfs() {
+        while (!que.isEmpty() ) {
+            int cur = que.poll();
+
+            for (int node:g.get(cur)) {
+                if (dist[node] > dist[cur] + 1) {
+                    que.offer(node);
+                    dist[node] = dist[cur] + 1;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void output() throws IOException {
+//        Collections.sort(res);
+//        for (int i=0;i<res.size()-1;i++)
+//            System.out.print(res.get(i)+" ");
+//        System.out.print(res.get(res.size()-1));
+        for (int i=1;i<=n;i++)
+            if (dist[i] <= k)
+                System.out.print(i+" ");
+    }
+}
+class AkP1073 extends Problem {
+    int x,y;
+    int[][] g;
+    int[][] dist;
+    int[] dx = {-2,-2,-1,-1,1,1,2,2};
+    int[] dy = {-1,1,-2,2,-2,2,-1,1};
+    Queue<Node> que = new ArrayDeque<>();
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        x = scan.nextInt();
+        y = scan.nextInt();
+        dist = new int[n+1][m+1];
+        for (int[] arr:dist)
+            Arrays.fill(arr,Integer.MAX_VALUE);
+        que.offer(new Node(x,y));
+        dist[x][y] = 0;
+        bfs();
+        output();
+    }
+    public void bfs() {
+        while(!que.isEmpty()) {
+            Node node = que.poll();
+            for (int i=0;i<8;i++) {
+                int nx = node.x + dx[i];
+                int ny = node.y + dy[i];
+                if (nx < 1 || nx > n || ny < 1 || ny > m || dist[nx][ny] != Integer.MAX_VALUE)
+                    continue;
+                dist[nx][ny] = dist[node.x][node.y] + 1;
+                que.offer(new Node(nx,ny));
+            }
+        }
+    }
+
+    @Override
+    public void output() throws IOException {
+        for (int i=1;i<=n;i++) {
+            for (int j = 1; j <= m; j++) {
+                if (dist[i][j] == Integer.MAX_VALUE) dist[i][j] = -1;
+                System.out.print(dist[i][j]+" ");
+            }
+            System.out.println();
+        }
+    }
+}
+class AkP1072 extends Problem {
+    int x1,y1,x2,y2;
+    int[] dx = {-1,0,1,0};
+    int[] dy = {0,-1,0,1};
+    int[][] g;
+    int[][] dist;
+    Queue<Node> que = new ArrayDeque<>();
+    class Node {
+        int x,y;
+        public Node(int x,int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        scan.nextLine();
+        g = new int[n][n];
+        dist = new int[n][n];
+//        dist[x1][y1] = 0;
+        for (int[] num:dist)
+            Arrays.fill(num, Integer.MAX_VALUE);
+        for (int i=0;i<n;i++) {
+            str = scan.nextLine();
+            for (int j=0;j<n;j++) {
+                g[i][j] = str.charAt(j) - '0';
+            }
+        }
+        String[] str = scan.nextLine().split(" ");
+        x1 = Integer.parseInt(str[0]) - 1;
+        y1 = Integer.parseInt(str[1]) - 1;
+        x2 = Integer.parseInt(str[2]) - 1;
+        y2 = Integer.parseInt(str[3]) - 1;
+        dist[x1][y1] = 0;
+        que.offer(new Node(x1,y1));
+        bfs();
+//        System.out.println(Arrays.deepToString(dist));
+        output();
+    }
+    public void bfs() {
+        while(!que.isEmpty()) {
+            Node node = que.poll();
+            int x = node.x;
+            int y = node.y;
+            for (int i=0;i<4;i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
+                if (nx >= 0 && nx < n && ny >= 0 && ny < n
+                        && g[nx][ny] != 1
+                        && dist[nx][ny] == Integer.MAX_VALUE) {//没访问过,或者 dist[nx][ny] > dist[x][y] + 1,∵访问过的点，要么比他小，要么为当前点+1
+                    que.offer(new Node(nx,ny));
+                    dist[nx][ny] = dist[x][y] + 1;
+                }
+            }
+
+
+
+        }
+    }
+
+    @Override
+    public void output() throws IOException {
+        ans = dist[x2][y2];
+        if (ans == Integer.MAX_VALUE)
+            System.out.println(-1);
+        else
+            System.out.println(ans);
+    }
+}
+class IEEEP6 extends Problem {
+    class Node {
+        int next;
+        int w;//边权
+        public Node(int next,int w) {
+            this.next = next;
+            this.w = w;
+        }
+    }
+    int[] w;
+    List<List<Node>> g = new ArrayList<>();
+    public void dfs(int u,int fa) {
+        for (Node t : g.get(u)) {//访问u节点的所有节点
+            int x = t.next,w = t.w;
+            if (x == fa) continue;//访问过，两点互通
+            dfs(x,u);
+            // do things
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        for (int i=1;i<=m;i++) {
+            int a = scan.nextInt();
+            int b = scan.nextInt();
+            int c = scan.nextInt();
+            g.get(a).add(new Node(b,c));
+            g.get(b).add(new Node(a,c));
+        }
+        for (int i=1;i<=n;i++) {
+            w[i] = scan.nextInt();
+        }
+        dfs(1,-1);
+    }
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+class IEEEP3 extends Problem {
+    String[] grid;
+    boolean ans;
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        scan.nextLine();
+        grid = new String[n+1];
+        for (int i=0;i<n;i++)
+            grid[i] = scan.nextLine();
+        if (n == 1 && m == 1 && (grid[0].charAt(0)=='/' || grid[0].charAt(0)=='\\')) {
+            System.out.println("Stable");
+            return;
+        }
+        ans = isStable();
+        if (ans) System.out.println("Stable");
+        else System.out.println("Unstable");
+
+    }
+    private boolean isStable() {
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < m - 1; j++) {
+                boolean hasSlash = false;
+                boolean hasBackslash = false;
+
+                char[] corners = {
+                        grid[i].charAt(j), grid[i].charAt(j + 1),
+                        grid[i + 1].charAt(j), grid[i + 1].charAt(j + 1)
+                };
+//                System.out.println(corners);
+                for (char c : corners) {
+                    if (c == '/') {
+                        hasSlash = true;
+                    }
+                    if (c == '\\') {
+                        hasBackslash = true;
+                    }
+                }
+
+
+                if (!hasSlash && !hasBackslash) {
+                    return false;
+                }
+            }
+        }
+        return true;
+
+    }
+
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+//字符串切割、进制转换
+class IEEEP2 extends Problem {
+    long num1,num2,out;
+    String[] equal;
+    String op;
+    List<Integer> res = new ArrayList<>();
+    @Override
+    public void input() throws IOException {
+        String str = scan.nextLine();
+        equal = str.split("(?<=[-+*/=])|(?=[-+*/=])");
+//        System.out.println(Arrays.toString(equal));
+
+        for (int i=2;i<=16;i++) {
+            if (check(i))
+                res.add(i);
+        }
+        output();
+
+    }
+    public boolean isValid(String s,int radix) {
+        for (char c:s.toCharArray()) {
+            if (Character.digit(c,radix)<0) return false;
+        }
+        return true;
+    }
+    public boolean check(int radix) {
+        if (!isValid(equal[0], radix) || !isValid(equal[2], radix) || !isValid(equal[4], radix)) {
+            return false;
+        }
+        num1 = Long.parseLong(equal[0],radix);
+        op = equal[1];
+        num2 = Long.parseLong(equal[2],radix);
+        out = Long.parseLong(equal[4],radix);
+        switch (op) {
+            case "+":
+                return (num1 + num2) == out;
+            case "-":
+                return (num1 - num2) == out;
+            case "*":
+                return (num1 * num2) == out;
+            case "/":
+                return ((double) num1 / num2) == out;
+            default:
+                return false;
+        }
+    }
+    @Override
+    public void output() throws IOException {
+        if (res.isEmpty()) System.out.println("-1");
+        else {
+            for (Integer radix:res)
+                System.out.print(radix + " ");
+        }
+    }
+}
+//题意，原数组不能排序
+class IEEEP7 extends Problem {
+
+    @Override
+    public void input() throws IOException {
+        String[] nk = reader.readLine().split(" ");
+        n = Integer.parseInt(nk[0]);
+        k = Integer.parseInt(nk[1]);
+        nums = new int[n];
+        String[] str = reader.readLine().split(" ");
+        for (int i=0;i<n;i++) {
+            nums[i] = Integer.parseInt(str[i]);
+        }
+
+        while(k-->0) {
+            String[] str1 = reader.readLine().split(" ");
+            int l = Integer.parseInt(str1[0]);
+            int r = Integer.parseInt(str1[1]);
+            int kth = Integer.parseInt(str1[2]);
+            l--;
+            r--;
+            solve(l,r,kth);
+
+        }
+        writer.flush();
+
+    }
+    public void solve(int l,int r,int kth) throws IOException {
+        int[] numsTemp = new int[r-l+1];
+        for (int i=0,j=l;i<numsTemp.length;i++,j++) {
+            numsTemp[i] = nums[j];
+        }
+
+        Arrays.sort(numsTemp);
+        int goal = kth - 1;
+        if ( (goal+1<numsTemp.length && numsTemp[goal] == numsTemp[goal+1])
+                || (goal-1 >= 0 && numsTemp[goal] == numsTemp[goal-1]))
+            writer.write("Not Found\n");
+        else
+            writer.write(numsTemp[goal]+"\n");
+
+
+    }
+
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+//救援，求中位数点
+class IEEEP10 extends Problem {
+    List<Point> list = new ArrayList<>();
+    int midX,midY;//中位数
+    int totalInjur;
+    int ansX,ansY;
+    class Point {
+        int x,y,num;
+        public Point(int x,int y,int num) {
+            this.x = x;
+            this.y = y;
+            this.num = num;
+        }
+    }
+
+    @Override
+    public void input() throws IOException {
+        n = Integer.parseInt(reader.readLine());
+
+        while(n-->0) {
+            String[] num = reader.readLine().split(" ");
+            int x = Integer.parseInt(num[0]);
+            int y = Integer.parseInt(num[1]);
+            int injur = Integer.parseInt(num[2]);
+            totalInjur += injur;
+            list.add(new Point(x,y,injur));
+
+        }
+        midX = findMidX();
+        midY = findMidY();
+        output();
+    }
+    class CompareByX implements Comparator<Point> {
+        @Override
+        public int compare(Point o1, Point o2) {
+            return o1.x - o2.x;
+        }
+    }
+    class CompareByY implements Comparator<Point> {
+
+        @Override
+        public int compare(Point o1, Point o2) {
+            return o1.y - o2.y;
+        }
+    }
+    public int findMidX() {
+        list.sort(new CompareByX());
+        int sum = 0;
+        for (int i=0;i<list.size();i++) {
+            sum+=list.get(i).num;
+            if (sum >= (totalInjur+1)>>1)
+                return list.get(i).x;
+        }
+        return 0;
+    }
+    public int findMidY() {
+        list.sort(new CompareByY());
+        int sum = 0;
+        for (int i=0;i<list.size();i++) {
+            sum+=list.get(i).num;
+            if (sum >= (totalInjur+1)>>1)
+                return list.get(i).y;
+        }
+        return 0;
+    }
+    @Override
+    public void output() throws IOException {
+        long min = Long.MAX_VALUE;
+        for (Point loc : list) {
+            long dis = Math.abs(loc.x - midX) + Math.abs(loc.y - midY);
+            if (dis < min) {
+                min = dis;
+                ansX = loc.x;
+                ansY = loc.y;
+            }
+        }
+        System.out.println(ansX +" "+ansY);
+    }
+}
+//零钱兑换，动态规划
+class IEEEP8 extends Problem {
+    int[] c;
+    int[] dp;
+    @Override
+    public void input() throws IOException {
+        k = scan.nextInt();
+        c = new int[k+1];
+        for (int i=1;i<=k;i++) {
+            c[i] = scan.nextInt();
+        }
+        T = scan.nextInt();
+        dp = new int[T+1];
+        Arrays.fill(dp,T+1);
+        dp[0] = 0;
+
+        for (int i=1;i<=T;i++)
+            for (int j=0;j<c.length;j++) {
+                if (i >= c[j]) dp[i] = Math.min(dp[i],dp[i-c[j]] + 1);
+            }
+        output();
+    }
+
+    @Override
+    public void output() throws IOException {
+        System.out.println(dp[T]);
+    }
+}
+//字符串匹配，我的解法O(n)但错在哪里？
+class IEEEP11 extends Problem {
+    String T,P;
+    List<Integer> str = new ArrayList<>();
+    @Override
+    public void input() throws IOException {
+        T = scan.nextLine();
+        P = scan.nextLine();
+        int tlen = T.length();
+        int plen = P.length();
+        for (int i=0;i<=tlen-plen;i++) {
+            if (T.substring(i,i+plen).equals(P)) {
+                str.add(i);
+            }
+        }
+//        for (int i=0,j=0;i<=T.length()-P.length();i++) {
+//            if (T.charAt(i) == P.charAt(j)) {
+//                int temp = i;
+//                i++;
+//                j++;
+//                while (j < P.length() && i < T.length() && T.charAt(i) == P.charAt(j)) {
+//                    i++;
+//                    j++;
+//                }
+//                if (j == P.length()) {
+//                    str.add(temp);
+//                }
+//                j = 0;
+//                i--;
+//
+//            }
+//        }
+        output();
+    }
+
+    @Override
+    public void output() throws IOException {
+        if (str.isEmpty()) System.out.println("Not Found");
+        else {
+            for (int i=0;i<str.size();i++) {
+                if (i!=0)
+                    System.out.print(" " + str.get(i));
+                else System.out.print(str.get(0));
+            }
+            System.out.println();
+        }
+    }
+}
+//区间不重叠最大数量，贪心
+class IEEEP9 extends Problem {
+    List<Interval> list = new ArrayList<>();
+    class Interval {
+        int str,end;
+        public Interval (int str,int end) {
+            this.end = end;
+            this.str = str;
+        }
+    }
+    class MyComparator implements Comparator<Interval> {
+
+        @Override
+        public int compare(Interval o1, Interval o2) {
+            if (o1.end != o2.end) return o1.end - o2.end;
+            else return o1.str - o2.str;
+        }
+    }
+    @Override
+    public void input() throws IOException {
+        n = Integer.parseInt(reader.readLine());
+        while (n-->0) {
+            String[] str = reader.readLine().split(" ");
+            int a = Integer.parseInt(str[0]);
+            int b = Integer.parseInt(str[1]);
+            list.add(new Interval(a,b));
+        }
+        list.sort(new MyComparator());
+
+        int curEnd = 0;
+        for (Interval node:list) {
+            if (node.str >= curEnd) {
+                ans++;
+                curEnd = node.end;
+            }
+        }
+        output();
+    }
+
+    @Override
+    public void output() throws IOException {
+        System.out.println(ans);
+    }
+}
+//子串是否能分割为三个回文，即枚举两个切割点再判断是否回文，但加上动态预判断回文
+class IEEEP12 extends Problem {
+    boolean[][] dp;
+    @Override
+    public void input() throws IOException {
+        str = scan.nextLine();
+        n = str.length();
+        dp = new boolean[n][n];
+        for (int i=0;i<n;i++)
+            dp[i][i] = true;
+
+        for (int len = 2;len<=n;len++) {
+            for (int i=0;i <=n-len;i++) {
+                int j = i + len - 1;
+                if (str.charAt(i) == str.charAt(j)) {
+                    if (len == 2 || dp[i+1][j-1])
+                        dp[i][j] = true;
+                }
+            }
+        }
+
+        for (int i = 1;i<n;i++)
+            for (int j=1;j<n;j++) {
+                if (dp[0][i-1] && dp[i][j-1] && dp[j][n-1]) {
+                    ans = 1;
+                    break;
+                }
+            }
+        if (ans == 1) System.out.println("true");
+        else System.out.println("false");
+    }
+
+
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+//递归题
+class IEEEP4 extends Problem {
+    int len;
+    int res;
+    @Override
+    public void input() throws IOException {
+        str = reader.readLine();
+        len = str.length();
+        n = Integer.parseInt(reader.readLine());
+        while(n-->0) {
+            long layer = 0;
+            long kth = Long.parseLong(reader.readLine());
+            kth--;
+            res = (int) (kth % len);
+            long k = (kth / len);
+            if (k != 0)
+                layer = (long) (Math.log(k) / Math.log(2)) +1;
+
+            ans = dfs(layer,k);
+            if (ans == 0) writer.write("0\n");
+            else writer.write("1\n");
+
+
+        }
+        writer.flush();
+
+    }
+    public int dfs(long n,long k) {
+        if (n == 0) return str.charAt(res)-'0';
+        else if (k % 2 ==0)
+            return dfs(n-1,k/2);
+        else
+            return 1 - dfs(n-1,k/2) ;
+    }
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+class AkP1063 extends Problem {
+    int[] a;
+    int[][] f;
+    int[] cnt2,cnt5;
+    int[] w;
+
+
+    List<List<Integer>> g = new ArrayList<>();
+    @Override
+    public void input()  throws IOException {
+        n = Integer.parseInt(reader.readLine());
+        a = new int[n+1];
+        cnt2 = new int[n+1];
+        cnt5 = new int[n+1];
+        w = new int[n+1];
+        f = new int[n+1][2];
+        String[] tokens = reader.readLine().split("\\s");
+        for (int i=1;i<=n;i++) {
+            g.add(new ArrayList<>());
+            a[i] = Integer.parseInt(tokens[i-1]);
+            while (a[i]%2 == 0) {
+                a[i]/=2;
+                cnt2[i]++;
+            }
+            while (a[i]%5 == 0) {
+                a[i]/=5;
+                cnt5[i]++;
+            }
+        }
+
+        g.add(new ArrayList<>());
+        for (int i=2;i<=n;i++) {
+            tokens = reader.readLine().split("\\s");
+            int u,v;
+            u = Integer.parseInt(tokens[0]);
+            v = Integer.parseInt(tokens[1]);
+            g.get(u).add(v);
+            g.get(v).add(u);
+        }
+
+        dfs(1,-1);
+        output();
+
+    }
+
+    public int zeroCnt(int u) {
+        return Math.min(f[u][0],f[u][1]);
+    }
+    public void dfs(int u,int fa) {
+        f[u][0] += cnt2[u];
+        f[u][1] += cnt5[u];
+        if (g.get(u).size() == 1 && u!= 1) {//注意排除根节点
+            w[u] = zeroCnt(u);
+            return;
+        }
+        for (Integer node:g.get(u)) {
+            if (node == fa) continue;
+            dfs(node,u);
+            f[u][0] += f[node][0];
+            f[u][1] += f[node][1];
+        }
+        w[u] = zeroCnt(u);
+    }
+    @Override
+    public void output() throws IOException {
+        for (int i=1;i<=n;i++) {
+            writer.write(w[i] + " ");
+        }
+        writer.flush();
+    }
+}
+/*原来思路错误点
+ 1.只考虑裁剪depth=3的点，但可能最高层值很大，裁到第二层减少的更多，脑子热昏了
+ 2.两次DFS，当n为10^5时，栈的空间消耗过大
+ */
+
+class AkP1062 extends Problem {
+    int[] a;
+    long[] factor;
+    long[] total;
+    int[] depth;
+
+    long max,cutSum,cutDepth;
+    List<List<Integer>> g = new ArrayList<>();
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+
+        a = new int[n+1];
+        total = new long[n+1];
+        depth = new int[n+1];
+        factor = new long[n+1];
+
+        for (int i = 1; i <= n; i++) {
+            g.add(new ArrayList<>());
+            a[i] = scan.nextInt();
+        }
+        g.add(new ArrayList<>());
+        for (int i = 1; i < n; i++) {
+            int u,v;
+
+            u = scan.nextInt();
+            v = scan.nextInt();
+            g.get(u).add(v);
+            g.get(v).add(u);
+        }
+        dfs(1,-1,1);
+        output();
+    }
+
+    public void dfs(int u,int fa,int depth) {
+        factor[u] = (long) depth * a[u];
+        total[u] = a[u];
+        this.depth[u] = depth;
+        for (Integer node: g.get(u)) {
+            if (node == fa) continue;
+            dfs(node,u,depth+1);
+            total[u] += total[node];
+            factor[u] += factor[node];
+        }
+
+    }
+    @Override
+    public void output() throws IOException {
+        ans = Long.MAX_VALUE;
+        for (int i=1;i<=n;i++) {
+            ans = Math.min(ans,factor[1] - (total[i]*(depth[i]-2)));
+        }
+
+        System.out.println(ans);
+    }
+}
+class AkP1059 extends Problem {
+    List<List<Integer>> g = new ArrayList<>();
+    int[] cnt;
+    int[] degree;
+    Integer[] node;
+
+    List<Integer> res = new ArrayList<>();
+    class myComparator implements Comparator<Integer> {
+
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            if (cnt[o1] != cnt[o2]) return cnt[o2] - cnt[o1];
+            else return o1-o2;
+        }
+    }
+
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        cnt = new int[n];
+        degree = new int[n];
+        node = new Integer[n];
+        for (int i=0;i<n;i++) {
+            g.add(new ArrayList<>());
+        }
+        for (int i=0;i<n;i++) {
+            int u = scan.nextInt();
+            if (u!= -1) {
+                g.get(u).add(i);
+                degree[i]++;
+            }
+        }
+        for (int i=0;i<n;i++) {
+            node[i] = i;
+            if (degree[i] == 0) {
+                dfs(i);
+            }
+        }
+        Arrays.sort(node,new myComparator());
+        for(int i = 0; i < n; i++) {
+            System.out.print(node[i] + " ");
+        }
+//        for (int i=0;i<n;i++) {
+//            map.get(cnt[i]).add(i);
+//        }
+//        for (Map.Entry<Integer, List<Integer>> entry : map.entrySet()) {
+//            Collections.sort(entry.getValue());
+//        }
+//        Arrays.sort(cnt);
+//        output();
+
+
+    }
+    public void dfs(int u) {
+        cnt[u] = 1;
+        for (Integer node:g.get(u)) {
+            dfs(node);
+            cnt[u] += cnt[node];
+        }
+    }
+    @Override
+    public void output() {
+//        for (int i=n-1;i>=0;i--) {
+//            if (map.containsKey(cnt[i]))
+//                for (Integer num : map.get(cnt[i])) {
+//                    if (!res.contains(num)) {
+//                        res.add(num);
+//                    }
+//                }
+//        }
+//        for (Integer num : res) {
+//            System.out.print(num + " ");
+//        }
+    }
+}
+class AkP1060 extends Problem {
+    List<List<Node>> g = new ArrayList<>();
+    Integer[] node;
+    int[] prior;
+    int[] degree;
+    class Node {
+        int next;
+        int weight;
+        public Node(int next,int weight) {
+            this.next = next;
+            this.weight = weight;
+        }
+    }
+    class myComparator implements Comparator<Integer> {
+
+        @Override
+        public int compare(Integer o1, Integer o2) {
+            if (prior[o1] != prior[o2]) return prior[o2] - prior[o1];
+            else return o1-o2;
+        }
+    }
+    @Override
+    public void input() {
+        n = scan.nextInt();
+        m = scan.nextInt();
+        node = new Integer[n+1];
+        prior = new int[n+1];
+        degree = new int[n+1];
+        for (int i=0;i<=n;i++) {
+            g.add(new ArrayList<>());
+            node[i] = i;
+        }
+        for (int i=0;i<m;i++) {
+            int pro,con,latency;
+            pro = scan.nextInt();
+            con = scan.nextInt();
+            latency = scan.nextInt();
+            g.get(pro).add(new Node(con,latency));
+            degree[con]++;
+        }
+        for (int i=1;i<=n;i++)
+            if (degree[i] == 0)
+                dfs(i);
+
+//        System.out.println(Arrays.toString(prior));
+        Arrays.sort(node,new myComparator());
+//        Arrays.sort(node,1,n,new myComparator());1到n排序后是从0开始放的
+        for (int i=0;i<=n;i++)
+            if (node[i]!=0 ) System.out.print(node[i]+" ");
+    }
+    public void dfs(int u) {
+        for (Node node:g.get(u)) {
+            dfs(node.next);
+            prior[u] = Math.max(prior[u],prior[node.next] + node.weight);
+        }
+    }
+    @Override
+    public void output() {
+
+    }
+}
 class AkP1061 extends Problem {
     List<List<Integer>> g = new ArrayList<>();
     int[] d;
