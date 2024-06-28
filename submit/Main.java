@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        new AkP1102().input();
+        new LongUpArr().input();
     }
 }
 
@@ -35,7 +35,106 @@ abstract class Problem {
         }
     }
 }
-class AkP1102 extends Problem {
+//状态定义
+class LongUpArr extends Problem {
+    long[] num;
+    int[] dp;
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        num = new long[n+1];
+        dp = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            num[i] = scan.nextLong();
+        }
+        dp[1] = 1;
+        for (int i=2;i<=n;i++) {
+            if (num[i] > num[i-1]) {
+                dp[i] = dp[i-1] + 1;
+            }
+            else
+                dp[i] = 1;
+            ans = Math.max(ans,dp[i]);
+        }
+        System.out.println(ans);
+    }
+
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+class TiaoGeZi extends Problem {
+    long[] sco;
+    long[] dp;
+    List<Integer> fb = new ArrayList<>();
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        sco = new long[n+1];
+        dp = new long[n+1];
+        Arrays.fill(dp,Long.MIN_VALUE);
+        feiBo();
+        for (int i=1;i<=n;i++) {
+            sco[i] = scan.nextLong();
+        }
+        dp[1] = sco[1];
+        for (int i=2;i<=n;i++) {
+            for (int j=0;j<fb.size();j++) {
+                int jump = fb.get(j);
+                if (i - jump < 0 )
+                    break;
+                dp[i] = Math.max(dp[i - jump] + sco[i], dp[i]);
+            }
+        }
+//        System.out.println(Arrays.toString(dp));
+        System.out.println(dp[n]);
+    }
+    public void feiBo() throws IOException {
+        int f1,f2,f3;
+        f1 = 1;
+        f2 = 1;
+        fb.add(1);
+        for (int i = 3; i <= 100; i++) {
+            f3 = f1 + f2;
+            f1 = f2;
+            f2 = f3;
+
+            if (f2 >= (int)1e5 * 2)
+                break;
+            fb.add(f2);
+        }
+
+    }
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+class TiaoTiaoQi extends Problem {
+    int[] sco;
+    int[] dp;
+    @Override
+    public void input() throws IOException {
+        n = scan.nextInt();
+        sco = new int[n+1];
+        dp = new int[n+1];
+        for (int i=1;i<=n;i++) {
+            sco[i] = scan.nextInt();
+        }
+        dp[1] = sco[1];
+        for (int i=2;i<=n;i++) {
+            dp[i] = Math.max(dp[i-2]+sco[i],dp[i-1]);
+        }
+        System.out.println(dp[n]);
+    }
+
+    @Override
+    public void output() throws IOException {
+
+    }
+}
+class FeiBo extends Problem {
     long f1 = 1;
     long f2 = 1;
     long f3;
